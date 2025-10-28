@@ -38,13 +38,105 @@ n_mut_shared <- list(
   "1 2" = 8         # Shared by Clone1 and Clone2
 )
 
-# Technical noise (sequencing error)
-noise_sd <- 0.02  # Standard deviation of gaussian noise
+# ===== NOISE MODEL PARAMETERS =====
 
-# ===== FUNCTIONS =====
+# Biological noise (tumor heterogeneity, sampling effects)
+biological_noise <- list(
+  enabled = TRUE,
+  # Beta distribution parameters for intra-tumor heterogeneity
+  # Higher concentration = less variability
+  concentration = 50  # Controls shape of Beta distribution (alpha + beta)
+)
 
-# Function to generate mutations with allelic frequency
-generate_mutations <- function(n_mut, base_freq, clone_ids, type = "private", noise_sd = 0.02) {
+# Technical sequencing noise parameters
+sequencing_noise <- list(
+  enabled = TRUE,
+  # Depth distribution parameters
+  mean_depth = 100,           # Mean sequencing coverage
+  depth_variation = "negative_binomial",  # More realistic than Poisson
+  depth_dispersion = 20,      # Size parameter for negative binomial (lower = more variable)
+
+  # Sequencing error rate (base miscalls)
+  error_rate = 0.001,         # 0.1% error rate (typical for Illumina)
+
+  # Binomial sampling for read counts
+  binomial_sampling = TRUE    # Use binomial distribution for alt reads
+)
+
+# ===== NOISE MODEL FUNCTIONS =====
+
+# Function to apply biological noise using Beta distribution
+# Beta distribution is more realistic for frequencies bounded between 0 and 1
+apply_biological_noise <- function(true_freq, n_mutations, concentration = 50) {
+  if (n_mutations == 0) return(numeric(0))
+
+  # Beta distribution parameters
+  # Mean = alpha / (alpha + beta) = true_freq
+  # Concentration = alpha + beta (higher = less variable)
+  alpha <- true_freq * concentration
+  beta <- (1 - true_freq) * concentration
+
+  # Avoid degenerate cases
+  alpha <- pmax(alpha, 0.1)
+  beta <- pmax(beta, 0.1)
+
+  # Sample from Beta distribution
+  noisy_freq <- rbeta(n_mutations, shape1 = alpha, shape2 = beta)
+
+  # Limit to reasonable range
+  noisy_freq <- pmax(0.01, pmin(0.99, noisy_freq))
+
+  return(noisy_freq)
+}
+
+# Function to simulate realistic sequencing depth
+simulate_depth <- function(n_mutations, mean_depth = 100,
+                          distribution = "negative_binomial",
+                          dispersion = 20) {
+  if (distribution == "negative_binomial") {
+    # Negative binomial is more realistic: allows overdispersion
+    # (some positions have much higher/lower coverage than expected)
+    depths <- rnbinom(n_mutations, size = dispersion, mu = mean_depth)
+  } else if (distribution == "poisson") {
+    # Simple Poisson (less realistic)
+    depths <- rpois(n_mutations, lambda = mean_depth)
+  } else {
+    # Uniform depth (unrealistic but useful for testing)
+    depths <- rep(mean_depth, n_mutations)
+  }
+
+  # Ensure minimum depth of 10
+  depths <- pmax(depths, 10)
+
+  return(depths)
+}
+
+# Function to simulate sequencing reads with binomial sampling
+simulate_sequencing_reads <- function(true_vaf, depth, error_rate = 0.001) {
+  # Binomial sampling: each read is independently sampled
+  # This introduces stochastic variation (sampling noise)
+
+  # Observed VAF includes sequencing errors
+  observed_vaf <- true_vaf + error_rate
+  observed_vaf <- pmin(observed_vaf, 0.99)
+
+  # Sample alt reads from binomial distribution
+  alt_reads <- rbinom(length(true_vaf), size = depth, prob = observed_vaf)
+
+  # Calculate observed VAF from read counts
+  final_vaf <- alt_reads / depth
+
+  return(list(
+    vaf = final_vaf,
+    alt_reads = alt_reads,
+    ref_reads = depth - alt_reads
+  ))
+}
+
+# Main function to generate mutations with realistic noise model
+generate_mutations <- function(n_mut, base_freq, clone_ids, type = "private",
+                              bio_noise = biological_noise,
+                              seq_noise = sequencing_noise) {
 
   if (n_mut == 0) return(NULL)
 
@@ -61,16 +153,41 @@ generate_mutations <- function(n_mut, base_freq, clone_ids, type = "private", no
     clone_label <- paste0("Clone", clone_ids)
   }
 
-  # Base allelic frequency (with small biological variation)
-  vaf <- rnorm(n_mut, mean = base_freq, sd = noise_sd)
+  # Step 1: Apply biological noise (intra-tumor heterogeneity)
+  if (bio_noise$enabled) {
+    true_vaf <- apply_biological_noise(base_freq, n_mut, bio_noise$concentration)
+  } else {
+    true_vaf <- rep(base_freq, n_mut)
+  }
 
-  # Limit VAF between 0 and 1
-  vaf <- pmax(0.01, pmin(0.99, vaf))
+  # Step 2: Simulate sequencing depth
+  if (seq_noise$enabled) {
+    depth <- simulate_depth(n_mut,
+                           mean_depth = seq_noise$mean_depth,
+                           distribution = seq_noise$depth_variation,
+                           dispersion = seq_noise$depth_dispersion)
+  } else {
+    depth <- rep(100, n_mut)
+  }
+
+  # Step 3: Apply technical sequencing noise (binomial sampling + errors)
+  if (seq_noise$enabled && seq_noise$binomial_sampling) {
+    seq_result <- simulate_sequencing_reads(true_vaf, depth, seq_noise$error_rate)
+    observed_vaf <- seq_result$vaf
+    alt_reads <- seq_result$alt_reads
+  } else {
+    # Old deterministic model
+    observed_vaf <- true_vaf
+    alt_reads <- round(true_vaf * depth)
+  }
 
   # Create dataframe
   data.frame(
     Mutation = mut_names,
-    VAF = vaf,
+    True_VAF = true_vaf,      # Biological truth (with heterogeneity)
+    VAF = observed_vaf,        # Observed VAF (with sequencing noise)
+    Depth = depth,
+    Alt_reads = alt_reads,
     Clone = clone_label,
     Type = type,
     Clone_IDs = paste(clone_ids, collapse = ","),
@@ -91,7 +208,8 @@ mutation_list[[idx]] <- generate_mutations(
   founder_freq,
   clone_ids = 1:4,
   type = "founder",
-  noise_sd = noise_sd
+  bio_noise = biological_noise,
+  seq_noise = sequencing_noise
 )
 idx <- idx + 1
 
@@ -108,7 +226,8 @@ for (i in 1:length(n_mut_shared)) {
     shared_freq,
     clone_ids = shared_clones,
     type = "shared",
-    noise_sd = noise_sd
+    bio_noise = biological_noise,
+    seq_noise = sequencing_noise
   )
   idx <- idx + 1
 }
@@ -120,7 +239,8 @@ for (i in 1:length(subclone_freqs)) {
     subclone_freqs[i],
     clone_ids = i,
     type = "private",
-    noise_sd = noise_sd
+    bio_noise = biological_noise,
+    seq_noise = sequencing_noise
   )
   idx <- idx + 1
 }
@@ -135,13 +255,11 @@ complete_data$Position <- sample(1e6:2e8, nrow(complete_data), replace = TRUE)
 complete_data$Ref <- sample(c("A", "T", "C", "G"), nrow(complete_data), replace = TRUE)
 complete_data$Alt <- sample(c("A", "T", "C", "G"), nrow(complete_data), replace = TRUE)
 
-# Simulate sequencing coverage (depth)
-complete_data$Depth <- rpois(nrow(complete_data), lambda = 100)
-complete_data$Alt_reads <- round(complete_data$VAF * complete_data$Depth)
+# Note: Depth and Alt_reads are now generated by generate_mutations() with realistic noise
 
 # Reorder columns
 complete_data <- complete_data[, c("Mutation", "Chromosome", "Position",
-                                    "Ref", "Alt", "VAF", "Depth", "Alt_reads",
+                                    "Ref", "Alt", "True_VAF", "VAF", "Depth", "Alt_reads",
                                     "Clone", "Type")]
 
 # ===== OUTPUT =====
@@ -164,9 +282,34 @@ for (i in 1:length(n_mut_per_clone)) {
   cat("    Clone", i, ":", n_mut_per_clone[i], "\n")
 }
 
+cat("\n===== NOISE MODEL CONFIGURATION =====\n")
+cat("Biological noise (intra-tumor heterogeneity):\n")
+cat("  - Enabled:", biological_noise$enabled, "\n")
+if (biological_noise$enabled) {
+  cat("  - Beta distribution concentration:", biological_noise$concentration, "\n")
+}
+cat("\nTechnical sequencing noise:\n")
+cat("  - Enabled:", sequencing_noise$enabled, "\n")
+if (sequencing_noise$enabled) {
+  cat("  - Mean depth:", sequencing_noise$mean_depth, "\n")
+  cat("  - Depth distribution:", sequencing_noise$depth_variation, "\n")
+  cat("  - Depth dispersion:", sequencing_noise$depth_dispersion, "\n")
+  cat("  - Sequencing error rate:", sequencing_noise$error_rate, "\n")
+  cat("  - Binomial sampling:", sequencing_noise$binomial_sampling, "\n")
+}
+
 # Statistics per clone
 cat("\n===== MEAN VAF PER MUTATION TYPE =====\n")
+cat("True VAF (biological):\n")
+print(aggregate(True_VAF ~ Type + Clone, data = complete_data, FUN = mean))
+cat("\nObserved VAF (with sequencing noise):\n")
 print(aggregate(VAF ~ Type + Clone, data = complete_data, FUN = mean))
+
+cat("\n===== SEQUENCING DEPTH STATISTICS =====\n")
+cat("Mean depth:", round(mean(complete_data$Depth), 2), "\n")
+cat("Median depth:", median(complete_data$Depth), "\n")
+cat("Depth range:", min(complete_data$Depth), "-", max(complete_data$Depth), "\n")
+cat("Depth std dev:", round(sd(complete_data$Depth), 2), "\n")
 
 # Count mutations per type
 cat("\n===== MUTATION COUNT PER TYPE =====\n")
