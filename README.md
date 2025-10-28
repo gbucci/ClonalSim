@@ -1,5 +1,7 @@
 # Tumor Mutational Profile Simulator
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17465573.svg)](https://doi.org/10.5281/zenodo.17465573)
+
 R script for simulating mutational profiles of tumor samples with hierarchical clonal structure.
 
 ## Description
