@@ -6,7 +6,7 @@ Script R per la simulazione di profili mutazionali di campioni tumorali con stru
 
 Questo strumento permette di simulare un campione di DNA tumorale composto da una miscela di cloni e sottocloni con frequenze alleliche (VAF - Variant Allele Frequency) specifiche. Lo script genera dati realistici che includono:
 
-- **Mutazioni troncali**: presenti in tutti i sottocloni
+- **Mutazioni founder**: presenti in tutti i sottocloni (eventi iniziali)
 - **Mutazioni condivise**: presenti in sottogruppi di cloni secondo una gerarchia evolutiva
 - **Mutazioni private**: specifiche di singoli sottocloni
 - **Rumore tecnico**: simulazione di errori di sequenziamento
@@ -76,8 +76,8 @@ freq_sottocloni <- c(0.15, 0.25, 0.30, 0.30)
 # Numero di mutazioni per ciascun sottoclone (private)
 n_mut_per_clone <- c(20, 25, 30, 15)
 
-# Numero di mutazioni troncali
-n_mut_troncali <- 10
+# Numero di mutazioni founder
+n_mut_founder <- 10
 
 # Struttura mutazioni condivise (gerarchia evolutiva)
 n_mut_condivise <- list(
@@ -114,7 +114,7 @@ Il file `profilo_mutazionale_simulato.csv` contiene le seguenti colonne:
 
 ```
 Mutazione          Cromosoma  Posizione  Ref  Alt  VAF     Depth  Alt_reads  Clone       Tipo
-Truncal_1          chr19      26274770   C    T    0.9888  101    100        Truncal     troncale
+Founder_1          chr19      26274770   C    T    0.9888  101    100        Founder     founder
 Shared_C2_3_4_mut1 chr9       76062670   C    C    0.8745  85     74         Clone2+3+4  condivisa
 Clone1_mut1        chr15      45123456   A    G    0.1498  95     14         Clone1      privata
 ```
@@ -126,7 +126,7 @@ Clone1_mut1        chr15      45123456   A    G    0.1498  95     14         Clo
 Il grafico **VAF_density_cumulativo.png** rappresenta la distribuzione delle frequenze alleliche come se avessi sequenziato il DNA del tumore reale (miscela di tutti i cloni). 
 
 **Picchi attesi:**
-- **~1.0**: Mutazioni troncali (presenti in tutte le cellule tumorali)
+- **~1.0**: Mutazioni founder (presenti in tutte le cellule tumorali)
 - **~0.85**: Mutazioni condivise da Clone2+3+4
 - **~0.60**: Mutazioni condivise da Clone3+4
 - **~0.40**: Mutazioni condivise da Clone1+2
@@ -186,7 +186,7 @@ n_mut_per_clone <- c(30, 40, 50, 60, 70, 50)
 
 # Struttura gerarchica più complessa
 n_mut_condivise <- list(
-  "1 2 3 4 5 6" = 20,  # Troncali (in alternativa a n_mut_troncali)
+  "1 2 3 4 5 6" = 20,  # Founder (in alternativa a n_mut_founder)
   "2 3 4 5 6" = 15,
   "3 4 5 6" = 12,
   "4 5 6" = 10,
