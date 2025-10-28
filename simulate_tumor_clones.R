@@ -329,8 +329,8 @@ rownames(freq_matrix) <- c("Founder", "Clone1", "Clone2", "Clone3", "Clone4")
 
 # Simulate evolution: founder grows first, then subclones emerge sequentially
 # Each column represents a snapshot in time
-# Scale frequencies to make clones MUCH more visible in the plot
-scale_factor <- 20.0  # Make clones 20x larger for visibility
+# Scale frequencies to make clones VERY visible in the plot
+scale_factor <- 50.0  # Make clones 50x larger for maximum visibility
 
 # At final timepoint, show the scaled clonal composition
 scaled_freqs <- subclone_freqs * scale_factor
@@ -338,11 +338,11 @@ total_scaled <- sum(scaled_freqs)
 
 # Build temporal progression showing emergence of clones
 # CRITICAL: At each timepoint, founder must be >= sum of all children
-freq_matrix[1, ] <- c(2, 5, 12, 18, total_scaled)                       # Founder grows to contain all clones
-freq_matrix[2, ] <- c(0, 0.5, 1.5, 2.5, scaled_freqs[1])                # Clone1 emerges early
-freq_matrix[3, ] <- c(0, 1.0, 3.0, 4.5, scaled_freqs[2])                # Clone2 emerges and grows
-freq_matrix[4, ] <- c(0, 0, 3.5, 5.5, scaled_freqs[3])                  # Clone3 emerges later, grows rapidly
-freq_matrix[5, ] <- c(0, 0, 2.5, 4.5, scaled_freqs[4])                  # Clone4 emerges later, grows rapidly
+freq_matrix[1, ] <- c(5, 15, 30, 45, total_scaled)                      # Founder grows to contain all clones
+freq_matrix[2, ] <- c(0, 1.5, 4.0, 6.5, scaled_freqs[1])                # Clone1 emerges early
+freq_matrix[3, ] <- c(0, 2.5, 7.0, 11.0, scaled_freqs[2])               # Clone2 emerges and grows
+freq_matrix[4, ] <- c(0, 0, 8.0, 13.5, scaled_freqs[3])                 # Clone3 emerges later, grows rapidly
+freq_matrix[5, ] <- c(0, 0, 6.0, 11.0, scaled_freqs[4])                 # Clone4 emerges later, grows rapidly
 
 # Create fishplot object
 fish <- createFishObject(freq_matrix, parents, timepoints = timepoints)
