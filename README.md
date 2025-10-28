@@ -1,192 +1,192 @@
-# Simulatore di Profili Mutazionali Tumorali
+# Tumor Mutational Profile Simulator
 
-Script R per la simulazione di profili mutazionali di campioni tumorali con struttura clonale gerarchica.
+R script for simulating mutational profiles of tumor samples with hierarchical clonal structure.
 
-## Descrizione
+## Description
 
-Questo strumento permette di simulare un campione di DNA tumorale composto da una miscela di cloni e sottocloni con frequenze alleliche (VAF - Variant Allele Frequency) specifiche. Lo script genera dati realistici che includono:
+This tool allows you to simulate a tumor DNA sample composed of a mixture of clones and subclones with specific Variant Allele Frequencies (VAF - Variant Allele Frequency). The script generates realistic data that includes:
 
-- **Mutazioni founder**: presenti in tutti i sottocloni (eventi iniziali)
-- **Mutazioni condivise**: presenti in sottogruppi di cloni secondo una gerarchia evolutiva
-- **Mutazioni private**: specifiche di singoli sottocloni
-- **Rumore tecnico**: simulazione di errori di sequenziamento
+- **Founder mutations**: present in all subclones (initial events)
+- **Shared mutations**: present in subgroups of clones according to evolutionary hierarchy
+- **Private mutations**: specific to individual subclones
+- **Technical noise**: sequencing error simulation
 
-## Caratteristiche
+## Features
 
-### Struttura Clonale Simulata
+### Simulated Clonal Structure
 
-Lo script simula un tumore eterogeneo con:
-- 4 sottocloni con frequenze configurabili (default: 0.15, 0.25, 0.30, 0.30)
-- Gerarchia evolutiva: Clone1 → Clone2,3 → Clone4
-- Mutazioni distribuite secondo modello evolutivo realistico
+The script simulates a heterogeneous tumor with:
+- 4 subclones with configurable frequencies (default: 0.15, 0.25, 0.30, 0.30)
+- Evolutionary hierarchy: Clone1 → Clone2,3 → Clone4
+- Mutations distributed according to realistic evolutionary model
 
-### Output Generati
+### Generated Output
 
-1. **profilo_mutazionale_simulato.csv**: Dataset completo con tutte le mutazioni
-2. **VAF_density_cumulativo.png**: Density plot del campione mischiato (come sequenziamento reale)
-3. **VAF_scatter_plot.png**: Scatter plot di tutte le VAF
-4. **VAF_distribuzione_per_tipo.png**: Istogrammi per tipo di mutazione
-5. **VAF_violin_plot.png**: Violin plot per visualizzare distribuzioni
-6. **matrice_clonale.png**: Heatmap presenza/assenza mutazioni nei cloni
+1. **simulated_mutational_profile.csv**: Complete dataset with all mutations
+2. **VAF_cumulative_density.png**: Density plot of mixed sample (as in real sequencing)
+3. **VAF_scatter_plot.png**: Scatter plot of all VAFs
+4. **VAF_distribution_per_type.png**: Histograms per mutation type
+5. **VAF_violin_plot.png**: Violin plots to visualize distributions
+6. **clonal_matrix.png**: Heatmap of mutation presence/absence in clones
 
-## Requisiti
+## Requirements
 
 ### Software
 - R >= 4.0
-- Pacchetti R:
+- R packages:
   - `ggplot2`
   - `tidyr`
 
-### Installazione dipendenze
+### Installing Dependencies
 
 ```bash
 # Ubuntu/Debian
 sudo apt-get install r-base r-cran-ggplot2 r-cran-tidyr
 
-# Oppure da R
+# Or from R
 install.packages(c("ggplot2", "tidyr"))
 ```
 
-## Utilizzo
+## Usage
 
-### Esecuzione Base
+### Basic Execution
 
 ```bash
-# Rendi eseguibile lo script
+# Make script executable
 chmod +x simulate_tumor_clones.R
 
-# Esegui
+# Run
 ./simulate_tumor_clones.R
 ```
 
-Oppure da R:
+Or from R:
 
 ```r
 source("simulate_tumor_clones.R")
 ```
 
-### Personalizzazione Parametri
+### Parameter Customization
 
-Modifica i parametri all'inizio dello script:
+Modify the parameters at the beginning of the script:
 
 ```r
-# Frequenze dei 4 sottocloni (devono sommare <= 1)
-freq_sottocloni <- c(0.15, 0.25, 0.30, 0.30)
+# Frequencies of the 4 subclones (must sum to <= 1)
+subclone_freqs <- c(0.15, 0.25, 0.30, 0.30)
 
-# Numero di mutazioni per ciascun sottoclone (private)
+# Number of mutations per subclone (private)
 n_mut_per_clone <- c(20, 25, 30, 15)
 
-# Numero di mutazioni founder
+# Number of founder mutations
 n_mut_founder <- 10
 
-# Struttura mutazioni condivise (gerarchia evolutiva)
-n_mut_condivise <- list(
-  "2 3 4" = 15,    # Condivise da Clone2, Clone3, Clone4
-  "3 4" = 12,      # Condivise da Clone3 e Clone4
-  "1 2" = 8        # Condivise da Clone1 e Clone2
+# Shared mutation structure (evolutionary hierarchy)
+n_mut_shared <- list(
+  "2 3 4" = 15,    # Shared by Clone2, Clone3, Clone4
+  "3 4" = 12,      # Shared by Clone3 and Clone4
+  "1 2" = 8        # Shared by Clone1 and Clone2
 )
 
-# Rumore tecnico (deviazione standard)
-rumore_sd <- 0.02
+# Technical noise (standard deviation)
+noise_sd <- 0.02
 ```
 
-## Struttura dei Dati di Output
+## Output Data Structure
 
-### File CSV
+### CSV File
 
-Il file `profilo_mutazionale_simulato.csv` contiene le seguenti colonne:
+The `simulated_mutational_profile.csv` file contains the following columns:
 
-| Colonna | Descrizione |
+| Column | Description |
 |---------|-------------|
-| `Mutazione` | Identificatore univoco della mutazione |
-| `Cromosoma` | Cromosoma (chr1-chr22) |
-| `Posizione` | Posizione genomica |
-| `Ref` | Allele di riferimento |
-| `Alt` | Allele alternativo |
+| `Mutation` | Unique mutation identifier |
+| `Chromosome` | Chromosome (chr1-chr22) |
+| `Position` | Genomic position |
+| `Ref` | Reference allele |
+| `Alt` | Alternative allele |
 | `VAF` | Variant Allele Frequency (0-1) |
-| `Depth` | Copertura di sequenziamento |
-| `Alt_reads` | Numero di read con allele alternativo |
-| `Clone` | Clone/i che portano la mutazione |
-| `Tipo` | Tipo di mutazione (troncale/condivisa/privata) |
-| `Clone_IDs` | ID numerici dei cloni coinvolti |
+| `Depth` | Sequencing coverage |
+| `Alt_reads` | Number of reads with alternative allele |
+| `Clone` | Clone(s) carrying the mutation |
+| `Type` | Mutation type (founder/shared/private) |
+| `Clone_IDs` | Numerical IDs of involved clones |
 
-### Esempio Output
+### Example Output
 
 ```
-Mutazione          Cromosoma  Posizione  Ref  Alt  VAF     Depth  Alt_reads  Clone       Tipo
-Founder_1          chr19      26274770   C    T    0.9888  101    100        Founder     founder
-Shared_C2_3_4_mut1 chr9       76062670   C    C    0.8745  85     74         Clone2+3+4  condivisa
-Clone1_mut1        chr15      45123456   A    G    0.1498  95     14         Clone1      privata
+Mutation            Chromosome  Position  Ref  Alt  VAF     Depth  Alt_reads  Clone       Type
+Founder_1           chr19       26274770  C    T    0.9888  101    100        Founder     founder
+Shared_C2_3_4_mut1  chr9        76062670  C    C    0.8745  85     74         Clone2+3+4  shared
+Clone1_mut1         chr15       45123456  A    G    0.1498  95     14         Clone1      private
 ```
 
-## Interpretazione dei Risultati
+## Interpreting Results
 
-### Density Plot Cumulativo
+### Cumulative Density Plot
 
-Il grafico **VAF_density_cumulativo.png** rappresenta la distribuzione delle frequenze alleliche come se avessi sequenziato il DNA del tumore reale (miscela di tutti i cloni). 
+The **VAF_cumulative_density.png** plot represents the distribution of allelic frequencies as if you had sequenced the DNA from the real tumor (mixture of all clones).
 
-**Picchi attesi:**
-- **~1.0**: Mutazioni founder (presenti in tutte le cellule tumorali)
-- **~0.85**: Mutazioni condivise da Clone2+3+4
-- **~0.60**: Mutazioni condivise da Clone3+4
-- **~0.40**: Mutazioni condivise da Clone1+2
-- **0.15-0.30**: Mutazioni private dei singoli cloni
+**Expected peaks:**
+- **~1.0**: Founder mutations (present in all tumor cells)
+- **~0.85**: Mutations shared by Clone2+3+4
+- **~0.60**: Mutations shared by Clone3+4
+- **~0.40**: Mutations shared by Clone1+2
+- **0.15-0.30**: Private mutations of individual clones
 
-### Matrice Clonale
+### Clonal Matrix
 
-L'heatmap **matrice_clonale.png** mostra quali mutazioni sono presenti in quali cloni, ordinata per VAF decrescente. Questo visualizza chiaramente la gerarchia evolutiva del tumore.
+The **clonal_matrix.png** heatmap shows which mutations are present in which clones, ordered by decreasing VAF. This clearly visualizes the evolutionary hierarchy of the tumor.
 
-## Modello Biologico
+## Biological Model
 
-### Assunzioni del Modello
+### Model Assumptions
 
-1. **Purezza del campione**: La somma delle frequenze clonali rappresenta la frazione tumorale
-2. **Ploidia**: Assunzione diploide (VAF max teorica = 0.5 per mutazioni eterozigoti)
-3. **Evoluzione clonale**: Struttura gerarchica (albero filogenetico)
-4. **Errori tecnici**: Rumore gaussiano con SD configurabile
+1. **Sample purity**: The sum of clonal frequencies represents the tumor fraction
+2. **Ploidy**: Diploid assumption (maximum theoretical VAF = 0.5 for heterozygous mutations)
+3. **Clonal evolution**: Hierarchical structure (phylogenetic tree)
+4. **Technical errors**: Gaussian noise with configurable SD
 
-### Limitazioni
+### Limitations
 
-- Non simula Copy Number Alterations (CNA)
-- Non considera contaminazione con cellule normali esplicita
-- Assunzione di mutazioni heterozygous
-- Non include subclonal loss of heterozygosity (LOH)
+- Does not simulate Copy Number Alterations (CNA)
+- Does not consider explicit contamination with normal cells
+- Assumes heterozygous mutations
+- Does not include subclonal Loss of Heterozygosity (LOH)
 
-## Casi d'Uso
+## Use Cases
 
-### Ricerca
+### Research
 
-- Testing di algoritmi di deconvoluzione clonale
-- Benchmarking di variant caller
-- Sviluppo di metodi di analisi filogenetica tumorale
-- Studi di eterogeneità intratumorale
+- Testing clonal deconvolution algorithms
+- Benchmarking variant callers
+- Development of tumor phylogenetic analysis methods
+- Intratumoral heterogeneity studies
 
-### Didattica
+### Education
 
-- Insegnamento di concetti di evoluzione clonale
-- Visualizzazione di eterogeneità tumorale
-- Esercitazioni su analisi di NGS data
+- Teaching clonal evolution concepts
+- Visualizing tumor heterogeneity
+- NGS data analysis exercises
 
-### Validazione
+### Validation
 
-- Controllo positivo per pipeline di analisi
-- Test di sensibilità di metodi di detection
-- Validazione di strumenti bioinformatici
+- Positive control for analysis pipelines
+- Sensitivity testing of detection methods
+- Validation of bioinformatics tools
 
-## Esempi Avanzati
+## Advanced Examples
 
-### Simulare un Tumore con Alta Eterogeneità
+### Simulating a Tumor with High Heterogeneity
 
 ```r
-# 6 sottocloni con frequenze diverse
-freq_sottocloni <- c(0.05, 0.10, 0.15, 0.20, 0.25, 0.25)
+# 6 subclones with different frequencies
+subclone_freqs <- c(0.05, 0.10, 0.15, 0.20, 0.25, 0.25)
 
-# Aumenta il numero di mutazioni
+# Increase number of mutations
 n_mut_per_clone <- c(30, 40, 50, 60, 70, 50)
 
-# Struttura gerarchica più complessa
-n_mut_condivise <- list(
-  "1 2 3 4 5 6" = 20,  # Founder (in alternativa a n_mut_founder)
+# More complex hierarchical structure
+n_mut_shared <- list(
+  "1 2 3 4 5 6" = 20,  # Founder (alternative to n_mut_founder)
   "2 3 4 5 6" = 15,
   "3 4 5 6" = 12,
   "4 5 6" = 10,
@@ -195,103 +195,103 @@ n_mut_condivise <- list(
 )
 ```
 
-### Simulare Tumore con Bassa Purezza
+### Simulating Low Purity Tumor
 
 ```r
-# Frequenze basse per simulare contaminazione normale
-freq_sottocloni <- c(0.05, 0.10, 0.12, 0.13)  # Somma = 0.40 (40% cellule tumorali)
+# Low frequencies to simulate normal contamination
+subclone_freqs <- c(0.05, 0.10, 0.12, 0.13)  # Sum = 0.40 (40% tumor cells)
 
-# Aumenta il rumore per simulare errori maggiori
-rumore_sd <- 0.03
+# Increase noise to simulate greater errors
+noise_sd <- 0.03
 ```
 
-### Esportare per Analisi Downstream
+### Export for Downstream Analysis
 
 ```r
-# Dopo aver generato i dati
-dati <- read.csv("profilo_mutazionale_simulato.csv")
+# After generating the data
+data <- read.csv("simulated_mutational_profile.csv")
 
-# Converti in formato VCF-like
-vcf_like <- dati[, c("Cromosoma", "Posizione", "Ref", "Alt", "VAF", "Depth", "Alt_reads")]
+# Convert to VCF-like format
+vcf_like <- data[, c("Chromosome", "Position", "Ref", "Alt", "VAF", "Depth", "Alt_reads")]
 
-# Salva
+# Save
 write.table(vcf_like, "mutations.tsv", sep="\t", quote=FALSE, row.names=FALSE)
 ```
 
 ## Troubleshooting
 
-### Errore: "package 'ggplot2' is not available"
+### Error: "package 'ggplot2' is not available"
 
 ```bash
-# Installa i pacchetti mancanti
+# Install missing packages
 R -e "install.packages(c('ggplot2', 'tidyr'), repos='https://cloud.r-project.org')"
 ```
 
 ### Warning: "removed rows containing missing values"
 
-Normale se alcune mutazioni hanno VAF molto basse o alte che vengono troncate a 0.01-0.99.
+Normal if some mutations have very low or high VAFs that are truncated to 0.01-0.99.
 
-### Le frequenze non sommano a 1
+### Frequencies don't sum to 1
 
-Questo è intenzionale! Rappresenta la possibilità di contaminazione con cellule normali. Se vuoi purezza 100%, assicurati che `sum(freq_sottocloni) = 1.0`.
+This is intentional! It represents the possibility of contamination with normal cells. If you want 100% purity, ensure that `sum(subclone_freqs) = 1.0`.
 
-## Estensioni Future
+## Future Extensions
 
-- [ ] Supporto per Copy Number Variations (CNV)
-- [ ] Simulazione di Loss of Heterozygosity (LOH)
-- [ ] Modelli di evoluzione non-gerarchici (reticolare)
-- [ ] Export diretto in formato VCF
-- [ ] Interfaccia Shiny per uso interattivo
-- [ ] Simulazione di dati RNA-seq con allelic expression
+- [ ] Support for Copy Number Variations (CNV)
+- [ ] Loss of Heterozygosity (LOH) simulation
+- [ ] Non-hierarchical (reticulate) evolution models
+- [ ] Direct export to VCF format
+- [ ] Shiny interface for interactive use
+- [ ] RNA-seq data simulation with allelic expression
 
-## Contribuire
+## Contributing
 
-Contributi, bug reports e feature requests sono benvenuti! 
+Contributions, bug reports, and feature requests are welcome!
 
-### Come Contribuire
+### How to Contribute
 
-1. Fork del repository
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit delle modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Licenza
+## License
 
-Questo progetto è rilasciato sotto licenza MIT. Vedi il file `LICENSE` per i dettagli.
+This project is released under the MIT license. See the `LICENSE` file for details.
 
-## Autori
+## Authors
 
-Creato per applicazioni bioinformatiche in oncologia computazionale.
+Created for bioinformatics applications in computational oncology.
 
-## Citazione
+## Citation
 
-Se utilizzi questo strumento nella tua ricerca, per favore cita:
+If you use this tool in your research, please cite:
 
 ```
-Tumor Clonal Simulator - Tool per la simulazione di profili mutazionali tumorali
-con struttura clonale gerarchica
+Tumor Clonal Simulator - Tool for simulating tumor mutational profiles
+with hierarchical clonal structure
 ```
 
-## Contatti
+## Contact
 
-Per domande, suggerimenti o collaborazioni, apri una issue su GitHub.
+For questions, suggestions, or collaborations, open an issue on GitHub.
 
-## Riferimenti
+## References
 
-### Letture Consigliate
+### Recommended Reading
 
 1. McGranahan N, Swanton C. **Clonal Heterogeneity and Tumor Evolution: Past, Present, and the Future.** Cell. 2017
 2. Dentro SC, Wedge DC, Van Loo P. **Principles of Reconstructing the Subclonal Architecture of Cancers.** Cold Spring Harb Perspect Med. 2017
 3. Schwarz RF, et al. **Phylogenetic Quantification of Intra-tumour Heterogeneity.** PLoS Comput Biol. 2014
 
-### Strumenti Correlati
+### Related Tools
 
-- **PyClone**: Analisi statistica di sottocloni tumorali
-- **SciClone**: Identificazione di cluster di mutazioni
-- **ABSOLUTE**: Stima di purezza e ploidia tumorale
-- **THetA**: Inferenza di copy number e purezza
+- **PyClone**: Statistical analysis of tumor subclones
+- **SciClone**: Identification of mutation clusters
+- **ABSOLUTE**: Estimation of tumor purity and ploidy
+- **THetA**: Inference of copy number and purity
 
 ---
 
-**Note**: Questo è uno strumento di simulazione. I dati generati sono sintetici e per scopi educativi/di ricerca.
+**Note**: This is a simulation tool. The generated data is synthetic and for educational/research purposes.
