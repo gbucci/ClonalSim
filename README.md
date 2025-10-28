@@ -30,6 +30,7 @@ The script simulates a heterogeneous tumor with:
 4. **VAF_distribution_per_type.png**: Histograms per mutation type
 5. **VAF_violin_plot.png**: Violin plots to visualize distributions
 6. **clonal_matrix.png**: Heatmap of mutation presence/absence in clones
+7. **fish_plot.png**: Fish plot showing temporal evolution of clonal populations
 
 ## Requirements
 
@@ -38,15 +39,21 @@ The script simulates a heterogeneous tumor with:
 - R packages:
   - `ggplot2`
   - `tidyr`
+  - `fishplot` (automatically installed if missing)
+  - `devtools` (for fishplot installation)
 
 ### Installing Dependencies
 
 ```bash
 # Ubuntu/Debian
-sudo apt-get install r-base r-cran-ggplot2 r-cran-tidyr
+sudo apt-get install r-base r-cran-ggplot2 r-cran-tidyr r-cran-devtools
 
 # Or from R
-install.packages(c("ggplot2", "tidyr"))
+install.packages(c("ggplot2", "tidyr", "devtools"))
+
+# fishplot will be automatically installed from GitHub when running the script
+# Or install manually:
+# devtools::install_github("chrisamiller/fishplot")
 ```
 
 ## Usage
@@ -137,6 +144,16 @@ The **VAF_cumulative_density.png** plot represents the distribution of allelic f
 ### Clonal Matrix
 
 The **clonal_matrix.png** heatmap shows which mutations are present in which clones, ordered by decreasing VAF. This clearly visualizes the evolutionary hierarchy of the tumor.
+
+### Fish Plot
+
+The **fish_plot.png** visualizes the temporal dynamics of clonal evolution. This plot shows:
+- **Horizontal axis**: Time progression (months)
+- **Vertical axis**: Clonal frequencies (proportion of tumor)
+- **Colored regions**: Different clones, with width representing their frequency at each timepoint
+- **Flow pattern**: How clones emerge, expand, and evolve over time
+
+The fish plot simulates a longitudinal sampling scenario, showing how the tumor's clonal composition would change from initial diagnosis through treatment and progression.
 
 ## Biological Model
 

@@ -88,6 +88,8 @@ The script follows a structured pipeline:
 
 6. **clonal_matrix.png**: Heatmap showing presence/absence of mutations in each clone, ordered by VAF
 
+7. **fish_plot.png**: Fish plot visualization showing temporal evolution of clonal populations across simulated timepoints (diagnosis, treatment, progression)
+
 ## Customization Patterns
 
 ### Simulating High Heterogeneity

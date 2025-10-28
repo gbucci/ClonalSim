@@ -6,6 +6,16 @@
 
 library(ggplot2)
 
+# Try to load fishplot, install if not available
+if (!requireNamespace("fishplot", quietly = TRUE)) {
+  message("Installing fishplot package...")
+  if (!requireNamespace("devtools", quietly = TRUE)) {
+    install.packages("devtools")
+  }
+  devtools::install_github("chrisamiller/fishplot")
+}
+library(fishplot)
+
 set.seed(123)  # For reproducibility
 
 # ===== SIMULATION PARAMETERS =====
@@ -298,13 +308,66 @@ p5 <- ggplot(matrix_long, aes(x = Clone, y = Index, fill = Present)) +
 
 ggsave("clonal_matrix.png", p5, width = 8, height = 10)
 
+# Plot 6: Fish plot - temporal evolution of clones
+# Simulate temporal evolution of clones across timepoints
+cat("\n===== Generating Fish Plot =====\n")
+
+# Define timepoints (e.g., diagnosis, during treatment, progression)
+timepoints <- c(0, 6, 12, 18, 24)  # months
+
+# Create parent-child relationships based on hierarchical structure
+# 0 = root (normal cells), 1 = founder
+# All clones are direct children of founder for simplicity in fish plot
+# (This represents the final evolutionary state, not the full phylogeny)
+parents <- c(0, 1, 1, 1, 1)  # Founder from root, all clones from founder
+
+# Simulate frequencies at different timepoints
+# Matrix: rows = clones (including founder), columns = timepoints
+# IMPORTANT: Child clones must sum to <= parent at each timepoint
+freq_matrix <- matrix(0, nrow = 5, ncol = length(timepoints))
+rownames(freq_matrix) <- c("Founder", "Clone1", "Clone2", "Clone3", "Clone4")
+
+# Simulate evolution: founder grows first, then subclones emerge sequentially
+# Each column represents a snapshot in time
+
+# At final timepoint, show the actual clonal composition
+# Founder = all cells (but subdivided into subclones)
+# Each clone shows its actual frequency
+freq_matrix[1, ] <- c(0.60, 0.70, 0.80, 0.90, sum(subclone_freqs))      # Founder (all tumor)
+freq_matrix[2, ] <- c(0, 0.05, 0.10, 0.12, subclone_freqs[1])           # Clone1 emerges
+freq_matrix[3, ] <- c(0, 0.10, 0.18, 0.22, subclone_freqs[2])           # Clone2 emerges
+freq_matrix[4, ] <- c(0, 0, 0.15, 0.25, subclone_freqs[3])              # Clone3 emerges later
+freq_matrix[5, ] <- c(0, 0, 0.10, 0.20, subclone_freqs[4])              # Clone4 emerges later
+
+# Create fishplot object
+fish <- createFishObject(freq_matrix, parents, timepoints = timepoints)
+
+# Set colors for each clone
+fish <- setCol(fish, c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+
+# Calculate layout
+fish <- layoutClones(fish)
+
+# Save fish plot
+png("fish_plot.png", width = 12, height = 7, units = "in", res = 300)
+fishPlot(fish,
+         shape = "spline",
+         title.btm = "Time (months)",
+         vlines = timepoints,
+         vlab = timepoints,
+         border = 1)
+dev.off()
+
+cat("Fish plot generated successfully!\n")
+
 cat("\n===== GENERATED FILES =====\n")
 cat("1. simulated_mutational_profile.csv - Complete mutation table\n")
 cat("2. VAF_distribution_per_type.png - VAF histograms per mutation type\n")
 cat("3. VAF_scatter_plot.png - Scatter plot of all VAFs\n")
 cat("4. VAF_cumulative_density.png - DENSITY PLOT of mixed sample\n")
 cat("5. VAF_violin_plot.png - Violin plot per mutation type\n")
-cat("6. clonal_matrix.png - Heatmap of mutation presence in clones\n\n")
+cat("6. clonal_matrix.png - Heatmap of mutation presence in clones\n")
+cat("7. fish_plot.png - Temporal evolution of clonal populations\n\n")
 
 # Show first rows
 cat("First rows of dataset:\n")
