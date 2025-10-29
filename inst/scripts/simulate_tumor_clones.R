@@ -21,7 +21,9 @@ set.seed(123)  # For reproducibility
 # ===== SIMULATION PARAMETERS =====
 
 # Frequencies of the 4 subclones (must sum to <= 1)
-subclone_freqs <- c(0.15, 0.25, 0.30, 0.30)  # Subclone 1, 2, 3, 4
+#subclone_freqs <- c(0.15, 0.25, 0.30, 0.30)  # Subclone 1, 2, 3, 4
+subclone_freqs <- c(0.06, 0.02, 0.02, 0.90)  # Subclone 1, 2, 3, 4
+
 names(subclone_freqs) <- paste0("Clone", 1:4)
 
 # Number of mutations per subclone (private mutations)

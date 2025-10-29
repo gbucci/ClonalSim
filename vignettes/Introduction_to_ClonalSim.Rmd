@@ -1,0 +1,410 @@
+---
+title: "Introduction to ClonalSim"
+author: "Gabriele Bucci"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Introduction to ClonalSim}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Introduction
+
+**ClonalSim** is an R/Bioconductor package for simulating tumor clonal evolution
+with realistic sequencing noise. It generates mutational profiles of heterogeneous
+tumor samples with hierarchical clonal structure, making it ideal for:
+
+- **Benchmarking** variant callers and mutation detection pipelines
+- **Testing** clonal deconvolution algorithms (PyClone, SciClone, etc.)
+- **Education** about tumor heterogeneity and clonal evolution
+- **Method development** for phylogenetic analysis
+
+## Key Features
+
+ClonalSim implements a **two-stage realistic noise model**:
+
+1. **Biological Noise**: Intra-tumor heterogeneity using Beta distribution
+2. **Technical Noise**: Sequencing artifacts including:
+   - Depth overdispersion (negative binomial)
+   - Stochastic read sampling (binomial)
+   - Base calling errors (Illumina-like)
+
+# Installation
+
+```{r install, eval=FALSE}
+# From Bioconductor (when available)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ClonalSim")
+
+# From GitHub (development version)
+BiocManager::install("gbucci/ClonalSim")
+```
+
+```{r library}
+library(ClonalSim)
+library(ggplot2)
+```
+
+# Basic Usage
+
+## Simple Simulation
+
+The main function is `simulateTumor()`, which generates a complete simulation:
+
+```{r basic_sim}
+# Simulate tumor with 4 subclones
+sim <- simulateTumor(
+  subclone_freqs = c(0.15, 0.25, 0.30, 0.30),
+  n_mut_per_clone = c(20, 25, 30, 15),
+  n_mut_founder = 10,
+  seed = 123
+)
+
+# Display summary
+sim
+```
+
+## Accessing Results
+
+```{r access_results}
+# Get mutation data
+mutations <- getMutations(sim)
+head(mutations)
+
+# Get simulation parameters
+params <- getSimParams(sim)
+params$subclone_freqs
+
+# Get true vs observed VAF
+true_vaf <- getTrueVAF(sim)
+obs_vaf <- getObservedVAF(sim)
+
+# Compare
+summary(true_vaf)
+summary(obs_vaf)
+```
+
+## Visualization
+
+ClonalSim provides built-in plotting functions:
+
+```{r plot_vaf_density, fig.cap="VAF density plot showing mixed tumor sample"}
+plot(sim, type = "vaf_density")
+```
+
+The density plot shows the distribution of variant allele frequencies as they
+would appear in real sequencing data. Expected peaks correspond to clone frequencies.
+
+```{r plot_vaf_scatter, fig.cap="VAF scatter plot colored by mutation type"}
+plot(sim, type = "vaf_scatter")
+```
+
+```{r plot_depth, fig.cap="Sequencing depth distribution"}
+plot(sim, type = "depth_histogram")
+```
+
+```{r plot_matrix, fig.cap="Clonal matrix showing mutation presence"}
+plot(sim, type = "clone_matrix")
+```
+
+# Understanding the Noise Model
+
+## Biological Noise: Beta Distribution
+
+Intra-tumor heterogeneity is modeled using a **Beta distribution**, which is
+more appropriate than Gaussian for frequency data (bounded 0-1).
+
+```{r bio_noise_demo, fig.cap="Effect of biological noise concentration parameter"}
+# High heterogeneity (low concentration)
+sim_high_het <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4, 0.3),
+  biological_noise = list(enabled = TRUE, concentration = 20),
+  seed = 123
+)
+
+# Low heterogeneity (high concentration)
+sim_low_het <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4, 0.3),
+  biological_noise = list(enabled = TRUE, concentration = 100),
+  seed = 123
+)
+
+# Compare VAF spread
+par(mfrow = c(1, 2))
+hist(getTrueVAF(sim_high_het), main = "High Heterogeneity\n(concentration = 20)",
+     xlab = "True VAF", breaks = 30, col = "skyblue")
+hist(getTrueVAF(sim_low_het), main = "Low Heterogeneity\n(concentration = 100)",
+     xlab = "True VAF", breaks = 30, col = "lightcoral")
+```
+
+## Technical Sequencing Noise
+
+### Depth Overdispersion
+
+Real NGS data shows **overdispersion** (variance > mean) due to GC bias,
+mappability, and PCR artifacts. ClonalSim uses negative binomial distribution:
+
+```{r depth_demo, fig.cap="Depth distributions: negative binomial vs Poisson"}
+# Realistic (negative binomial)
+sim_nb <- simulateTumor(
+  sequencing_noise = list(
+    mean_depth = 100,
+    depth_variation = "negative_binomial",
+    depth_dispersion = 20
+  ),
+  seed = 123
+)
+
+# Unrealistic (Poisson)
+sim_poisson <- simulateTumor(
+  sequencing_noise = list(
+    mean_depth = 100,
+    depth_variation = "poisson"
+  ),
+  seed = 124
+)
+
+par(mfrow = c(1, 2))
+hist(getMutations(sim_nb)$Depth, main = "Negative Binomial\n(realistic)",
+     xlab = "Depth", breaks = 30, col = "skyblue")
+hist(getMutations(sim_poisson)$Depth, main = "Poisson\n(unrealistic)",
+     xlab = "Depth", breaks = 30, col = "lightcoral")
+```
+
+### Binomial Read Sampling
+
+Each sequencing read is independently sampled, introducing **stochastic variation**.
+This is especially important at low depth or low VAF:
+
+```{r binomial_demo, fig.cap="Stochastic variation from binomial sampling"}
+# With binomial sampling (realistic)
+sim_binom <- simulateTumor(
+  sequencing_noise = list(binomial_sampling = TRUE),
+  seed = 123
+)
+
+# Without binomial sampling (deterministic)
+sim_det <- simulateTumor(
+  sequencing_noise = list(binomial_sampling = FALSE),
+  seed = 123
+)
+
+# Compare True_VAF vs observed VAF
+par(mfrow = c(1, 2))
+with(getMutations(sim_binom), {
+  plot(True_VAF, VAF, main = "With Binomial Sampling",
+       xlab = "True VAF", ylab = "Observed VAF", pch = 16, col = rgb(0,0,1,0.3))
+  abline(0, 1, col = "red", lty = 2)
+})
+with(getMutations(sim_det), {
+  plot(True_VAF, VAF, main = "Without Binomial Sampling",
+       xlab = "True VAF", ylab = "Observed VAF", pch = 16, col = rgb(0,0,1,0.3))
+  abline(0, 1, col = "red", lty = 2)
+})
+```
+
+# Common Use Cases
+
+## Low Purity Tumor
+
+Many clinical samples have significant normal cell contamination:
+
+```{r low_purity}
+sim_low_purity <- simulateTumor(
+  subclone_freqs = c(0.05, 0.10, 0.15),  # Sum = 0.30 (30% tumor)
+  seed = 123
+)
+
+cat("Tumor purity:", sum(getSimParams(sim_low_purity)$subclone_freqs), "\n")
+plot(sim_low_purity, type = "vaf_density")
+```
+
+## High Coverage Sequencing
+
+Deep targeted sequencing with uniform coverage:
+
+```{r high_coverage}
+sim_deep <- simulateTumor(
+  sequencing_noise = list(
+    enabled = TRUE,
+    mean_depth = 500,
+    depth_dispersion = 100,  # More uniform
+    error_rate = 0.0005
+  ),
+  seed = 123
+)
+
+summary(getMutations(sim_deep)$Depth)
+plot(sim_deep, type = "depth_histogram")
+```
+
+## Low Coverage Sequencing
+
+Exome sequencing with variable coverage:
+
+```{r low_coverage}
+sim_exome <- simulateTumor(
+  sequencing_noise = list(
+    mean_depth = 50,
+    depth_dispersion = 10,  # More variable
+    error_rate = 0.002
+  ),
+  seed = 123
+)
+
+summary(getMutations(sim_exome)$Depth)
+```
+
+## Ideal Data (No Noise)
+
+For testing algorithms without noise:
+
+```{r no_noise}
+sim_ideal <- simulateTumor(
+  biological_noise = list(enabled = FALSE),
+  sequencing_noise = list(enabled = FALSE),
+  seed = 123
+)
+
+# VAF exactly matches expected frequencies
+head(getMutations(sim_ideal)[, c("Clone", "True_VAF", "VAF")])
+```
+
+# Bioconductor Integration
+
+## Export to GRanges
+
+```{r granges}
+library(GenomicRanges)
+
+gr <- toGRanges(sim)
+gr
+
+# Access metadata
+mcols(gr)[1:5, ]
+
+# Subset by chromosome
+gr_chr1 <- gr[seqnames(gr) == "chr1"]
+length(gr_chr1)
+```
+
+## Export to VCF
+
+```{r vcf, eval=FALSE}
+# Get VRanges object
+vr <- toVCF(sim, sample_name = "TumorSample")
+
+# Write to VCF file
+toVCF(sim, output_file = "simulated_mutations.vcf")
+```
+
+## Export for Other Tools
+
+### PyClone Format
+
+```{r pyclone, eval=FALSE}
+toPyClone(sim, file = "pyclone_input.tsv", sample_id = "sample1")
+```
+
+### SciClone Format
+
+```{r sciclone, eval=FALSE}
+toSciClone(sim, file = "sciclone_input.tsv")
+```
+
+### Simple CSV
+
+```{r csv, eval=FALSE}
+df <- toDataFrame(sim)
+write.csv(df, "mutations.csv", row.names = FALSE)
+```
+
+# Benchmarking Workflow
+
+Here's a typical workflow for benchmarking a variant caller:
+
+```{r benchmark_workflow, eval=FALSE}
+# 1. Generate ground truth
+sim <- simulateTumor(
+  subclone_freqs = c(0.2, 0.3, 0.5),
+  n_mut_per_clone = c(50, 75, 50),
+  seed = 42
+)
+
+# 2. Export to VCF (ground truth)
+toVCF(sim, output_file = "ground_truth.vcf")
+
+# 3. Get true positive set
+true_mutations <- getMutations(sim)
+
+# 4. Run your variant caller on simulated data
+# (your variant caller code here)
+
+# 5. Compare results
+# - Sensitivity: TP / (TP + FN)
+# - Precision: TP / (TP + FP)
+# - F1 score: 2 * (Precision * Sensitivity) / (Precision + Sensitivity)
+
+# 6. Evaluate VAF estimation accuracy
+# cor(true_mutations$VAF, called_vaf)
+```
+
+# Advanced: Custom Clonal Structures
+
+## Complex Hierarchies
+
+```{r complex_hierarchy}
+sim_complex <- simulateTumor(
+  subclone_freqs = c(0.1, 0.15, 0.2, 0.25, 0.3),
+  n_mut_per_clone = c(30, 40, 50, 40, 30),
+  n_mut_shared = list(
+    "2 3 4 5" = 20,  # Shared by clones 2,3,4,5
+    "3 4 5" = 15,    # Shared by clones 3,4,5
+    "4 5" = 10,      # Shared by clones 4,5
+    "1 2" = 8        # Shared by clones 1,2
+  ),
+  seed = 123
+)
+
+plot(sim_complex, type = "vaf_density")
+```
+
+## Accessing Clonal Structure
+
+```{r clonal_structure}
+structure <- getClonalStructure(sim_complex)
+print(structure)
+```
+
+# Session Information
+
+```{r sessioninfo}
+sessionInfo()
+```
+
+# References
+
+1. McGranahan N, Swanton C. *Clonal Heterogeneity and Tumor Evolution: Past,
+   Present, and the Future.* Cell. 2017
+2. Dentro SC, Wedge DC, Van Loo P. *Principles of Reconstructing the Subclonal
+   Architecture of Cancers.* Cold Spring Harb Perspect Med. 2017
+3. Roth A, et al. *PyClone: statistical inference of clonal population structure
+   in cancer.* Nat Methods. 2014
+4. Miller CA, et al. *SciClone: inferring clonal architecture and tracking the
+   spatial and temporal patterns of tumor evolution.* PLoS Comput Biol. 2014

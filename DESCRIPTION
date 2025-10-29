@@ -3,9 +3,8 @@ Type: Package
 Title: Simulation of Tumor Clonal Evolution with Realistic Sequencing Noise
 Version: 0.99.0
 Authors@R: c(
-    person("Gabriele", "Bucci", email = "your.email@example.com",
-           role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Gabriele", "Bucci", email = "gabriele.bucci@example.com",
+           role = c("aut", "cre"))
     )
 Description: ClonalSim generates realistic mutational profiles of tumor samples
     with hierarchical clonal structure. It simulates founder, shared, and private
@@ -40,6 +39,6 @@ Suggests:
 biocViews: Software, Sequencing, SomaticMutation, Simulation,
     VariantDetection, Coverage, Visualization, DataImport
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 BugReports: https://github.com/gbucci/ClonalSim/issues
 URL: https://github.com/gbucci/ClonalSim

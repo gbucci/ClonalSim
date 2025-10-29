@@ -83,6 +83,8 @@ ClonalSimData <- function(mutations = data.frame(),
 #'
 #' @param object ClonalSimData object
 #' @return TRUE if valid, otherwise error message
+#' @name ClonalSimData-validity
+#' @rdname ClonalSimData-class
 #'
 setValidity("ClonalSimData", function(object) {
   errors <- character()

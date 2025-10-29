@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+inst/doc
+*.o
+*.so
+*.dll
+*~
+.DS_Store
+simulated_mutational_profile.csv
+*.png
+fish_plot.png
