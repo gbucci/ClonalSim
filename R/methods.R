@@ -118,6 +118,9 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' @return ggplot2 object
 #' @export
 #'
+#' @import ggplot2
+#' @importFrom tidyr pivot_longer
+#'
 #' @examples
 #' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
 #' plot(sim, type = "vaf_density")
