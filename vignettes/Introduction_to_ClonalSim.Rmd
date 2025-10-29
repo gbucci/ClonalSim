@@ -58,7 +58,7 @@ BiocManager::install("gbucci/ClonalSim")
 
 ```{r library}
 library(ClonalSim)
-library(ggplot2)
+library(ggplot2)  # Required for plotting functions
 ```
 
 # Basic Usage
@@ -102,9 +102,10 @@ summary(obs_vaf)
 
 ## Visualization
 
-ClonalSim provides built-in plotting functions:
+ClonalSim provides built-in plotting functions. **Note:** Make sure `ggplot2` is loaded:
 
 ```{r plot_vaf_density, fig.cap="VAF density plot showing mixed tumor sample"}
+# ggplot2 is already loaded above
 plot(sim, type = "vaf_density")
 ```
 

@@ -95,7 +95,8 @@ sim
 # Get detailed statistics
 summary(sim)
 
-# Visualize results
+# Visualize results (requires ggplot2)
+library(ggplot2)
 plot(sim, type = "vaf_density")
 ```
 
@@ -120,7 +121,11 @@ structure <- getClonalStructure(sim)
 
 ### Visualization
 
+**Note:** You need to load `ggplot2` explicitly for plotting:
+
 ```r
+library(ggplot2)
+
 # VAF density plot (most important)
 plot(sim, type = "vaf_density")
 

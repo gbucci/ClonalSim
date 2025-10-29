@@ -68,7 +68,10 @@ sim <- simulateTumor()
 # View results
 sim                          # Print summary
 summary(sim)                 # Detailed statistics
-plot(sim, type = "vaf_density")  # Visualization
+
+# Visualization (requires ggplot2)
+library(ggplot2)
+plot(sim, type = "vaf_density")
 
 # Get data
 mutations <- getMutations(sim)

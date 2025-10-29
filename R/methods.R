@@ -121,10 +121,17 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' @import ggplot2
 #' @importFrom tidyr pivot_longer
 #'
+#' @details
+#' Note: You need to load ggplot2 explicitly before using plot():
+#' \code{library(ggplot2)}
+#'
 #' @examples
+#' \dontrun{
+#' library(ggplot2)
 #' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
 #' plot(sim, type = "vaf_density")
 #' plot(sim, type = "vaf_scatter")
+#' }
 #'
 setMethod("plot", signature(x = "ClonalSimData", y = "missing"),
           function(x, y, type = "vaf_density", ...) {
