@@ -194,6 +194,25 @@ sim_ideal <- simulateTumor(
 )
 ```
 
+### Including Germline Variants
+
+Sequencing data includes both somatic and germline variants. Germline variants (heterozygous diploid) appear at VAF ~0.5 regardless of tumor purity:
+
+```r
+# 70% purity tumor with germline contamination
+sim_germline <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4),  # 70% tumor purity
+  germline_variants = list(
+    enabled = TRUE,
+    n_variants = 100,  # Number of germline SNPs
+    vaf_expected = 0.5  # Heterozygous diploid
+  )
+)
+
+# Germline VAF stays at ~0.5 in both pure and contaminated samples
+# This is because germline variants are heterozygous in BOTH tumor and normal cells
+```
+
 ## Bioconductor Integration
 
 ### Export to GRanges
@@ -392,7 +411,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Authors
 
-Created for bioinformatics applications in computational oncology.
+Created by Gabriele Bucci for bioinformatics applications in computational oncology.
 
 ## Support
 
