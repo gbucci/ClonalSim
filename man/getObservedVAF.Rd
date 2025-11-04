@@ -16,7 +16,7 @@ numeric vector of observed VAF values
 Get observed VAF values (with sequencing noise)
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 obs_vaf <- getObservedVAF(sim)
 summary(obs_vaf)
 

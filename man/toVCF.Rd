@@ -23,7 +23,7 @@ Exports mutation data to Variant Call Format (VCF), the
   object which can be written to VCF file.
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 
 # Get VRanges object
 vr <- toVCF(sim)

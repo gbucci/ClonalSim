@@ -16,7 +16,7 @@ data.frame with mutation information
 Get mutations data frame
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 mutations <- getMutations(sim)
 head(mutations)
 

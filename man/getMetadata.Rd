@@ -16,7 +16,7 @@ list with metadata
 Get metadata
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 metadata <- getMetadata(sim)
 metadata$date
 

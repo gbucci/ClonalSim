@@ -4,8 +4,10 @@
 #' @return NULL (prints to console)
 #' @export
 #'
+#' @importFrom methods show
+#'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' show(sim)
 #'
 setMethod("show", "ClonalSimData", function(object) {
@@ -50,8 +52,10 @@ setMethod("show", "ClonalSimData", function(object) {
 #' @return list with summary statistics
 #' @export
 #'
+#' @importFrom methods show
+#'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' summary(sim)
 #'
 setMethod("summary", "ClonalSimData", function(object) {
@@ -119,7 +123,7 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' @export
 #'
 #' @import ggplot2
-#' @importFrom tidyr pivot_longer
+#' @importFrom tidyr pivot_longer all_of
 #'
 #' @details
 #' Note: You need to load ggplot2 explicitly before using plot():
@@ -128,7 +132,7 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' library(ggplot2)
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' plot(sim, type = "vaf_density")
 #' plot(sim, type = "vaf_scatter")
 #' }
@@ -149,17 +153,64 @@ setMethod("plot", signature(x = "ClonalSimData", y = "missing"),
            x = "Variant Allele Frequency (VAF)",
            y = "Density")
 
-    # Add vertical lines for expected clone frequencies
+    # Add vertical lines and labels for expected clone frequencies
     if (length(params$subclone_freqs) > 0) {
+      # Add vertical lines for individual clones
       p <- p +
         geom_vline(xintercept = params$subclone_freqs,
                    linetype = "dashed", color = "red", alpha = 0.5, linewidth = 0.8) +
         geom_vline(xintercept = sum(params$subclone_freqs),
                    linetype = "dashed", color = "darkred", alpha = 0.7, linewidth = 1)
+
+      # Add text labels for each clone
+      clone_labels <- data.frame(
+        vaf = params$subclone_freqs,
+        label = paste0("C", seq_along(params$subclone_freqs)),
+        color = "red",
+        stringsAsFactors = FALSE
+      )
+
+      # Add label for founder (sum of all clones)
+      founder_label <- data.frame(
+        vaf = sum(params$subclone_freqs),
+        label = "Founder",
+        color = "darkred",
+        stringsAsFactors = FALSE
+      )
+
+      # Add germline label if germline variants are present
+      all_labels <- rbind(clone_labels, founder_label)
+      if (!is.null(params$germline_variants) && params$germline_variants$enabled) {
+        germline_label <- data.frame(
+          vaf = 0.5,
+          label = "Germline",
+          color = "#984EA3",
+          stringsAsFactors = FALSE
+        )
+        all_labels <- rbind(all_labels, germline_label)
+
+        # Add vertical line for germline
+        p <- p +
+          geom_vline(xintercept = 0.5,
+                     linetype = "dashed", color = "#984EA3", alpha = 0.6, linewidth = 0.8)
+      }
+
+      # Get y position for labels (top of the plot)
+      density_data <- ggplot_build(p)$data[[1]]
+      max_density <- max(density_data$density) * 1.05
+
+      p <- p +
+        geom_text(data = all_labels,
+                  aes(x = vaf, y = max_density, label = label),
+                  angle = 0, vjust = -0.5, hjust = 0.5,
+                  color = all_labels$color,
+                  size = 3.5, fontface = "bold",
+                  inherit.aes = FALSE)
     }
 
   } else if (type == "vaf_scatter") {
-    type_colors <- c("founder" = "#E41A1C", "shared" = "#377EB8", "private" = "#4DAF4A")
+    type_colors <- c("founder" = "#E41A1C", "shared" = "#377EB8",
+                     "private" = "#4DAF4A", "germline" = "#984EA3")
     p <- ggplot(mutations, aes(x = seq_len(nrow(mutations)), y = VAF, color = Type)) +
       geom_point(alpha = 0.6, size = 2) +
       scale_color_manual(values = type_colors) +

@@ -13,6 +13,7 @@ simulateTumor(
   sequencing_noise = list(enabled = TRUE, mean_depth = 100, depth_variation =
     "negative_binomial", depth_dispersion = 20, error_rate = 0.001, binomial_sampling =
     TRUE),
+  germline_variants = list(enabled = FALSE, n_variants = 50, vaf_expected = 0.5),
   seed = 123
 )
 }
@@ -46,6 +47,15 @@ Default: list("2 3 4" = 15, "3 4" = 12, "1 2" = 8)}
   \item binomial_sampling: logical, use binomial sampling (default: TRUE)
 }}
 
+\item{germline_variants}{list with germline variant parameters:
+\itemize{
+  \item enabled: logical, include germline variants (default: FALSE)
+  \item n_variants: integer, number of germline variants to simulate (default: 50)
+  \item vaf_expected: numeric, expected VAF for heterozygous germline (default: 0.5)
+}
+Germline variants will have VAF adjusted by tumor purity:
+observed_VAF = germline_vaf * tumor_purity + 0.5 * (1 - tumor_purity)}
+
 \item{seed}{integer, random seed for reproducibility. Default: 123}
 }
 \value{
@@ -68,8 +78,11 @@ sim <- simulateTumor(
   n_mut_per_clone = c(30, 40, 30)
 )
 
-# Low purity tumor
-sim <- simulateTumor(subclone_freqs = c(0.1, 0.15, 0.15))  # 40\% purity
+# Low purity tumor (40\% purity)
+sim <- simulateTumor(
+  subclone_freqs = c(0.1, 0.15, 0.15),
+  n_mut_per_clone = c(20, 25, 30)
+)
 
 # High coverage sequencing
 sim <- simulateTumor(
@@ -84,6 +97,13 @@ sim <- simulateTumor(
 sim <- simulateTumor(
   biological_noise = list(enabled = FALSE),
   sequencing_noise = list(enabled = FALSE)
+)
+
+# Include germline variants
+sim <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4),  # 70\% purity
+  n_mut_per_clone = c(40, 50),
+  germline_variants = list(enabled = TRUE, n_variants = 100)
 )
 
 }

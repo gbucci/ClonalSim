@@ -18,7 +18,7 @@ data.frame formatted for SciClone (invisibly)
 Exports data in format suitable for SciClone clonal analysis.
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 
 \dontrun{
 toSciClone(sim, file = "sciclone_input.tsv")

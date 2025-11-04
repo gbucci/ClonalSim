@@ -13,3 +13,9 @@
 ^simulated_mutational_profile\.csv$
 ^.*\.png$
 ^inst/scripts/simulate_tumor_clones\.R$
+.claude
+^CITATION\.cff$
+^PACKAGE_TRANSFORMATION\.md$
+^Rplot\.pdf$
+^paper\.bib$
+^paper\.md$

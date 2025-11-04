@@ -16,7 +16,7 @@ data.frame defining clone hierarchy
 Get clonal structure
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 structure <- getClonalStructure(sim)
 print(structure)
 

@@ -21,7 +21,7 @@ Exports data in format suitable for PyClone clonal deconvolution
   analysis.
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 
 \dontrun{
 toPyClone(sim, file = "pyclone_input.tsv")

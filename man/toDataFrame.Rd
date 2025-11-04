@@ -21,7 +21,7 @@ Simple export to data.frame (useful for compatibility with
   other tools like PyClone, SciClone)
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 df <- toDataFrame(sim)
 head(df)
 

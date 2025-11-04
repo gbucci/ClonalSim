@@ -9,8 +9,10 @@
 #' @return GRanges object with mutation information
 #' @export
 #'
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' gr <- toGRanges(sim)
 #' print(gr)
 #'
@@ -31,7 +33,7 @@ toGRanges <- function(object, include_metadata = TRUE) {
     seqnames.field = "Chromosome",
     start.field = "Position",
     end.field = "Position",
-    strand = "*",
+    strand.field = "*",
     keep.extra.columns = include_metadata
   )
 
@@ -67,8 +69,12 @@ toGRanges <- function(object, include_metadata = TRUE) {
 #' @return VRanges object (invisibly if output_file is specified)
 #' @export
 #'
+#' @importFrom VariantAnnotation VRanges writeVcf
+#' @importFrom S4Vectors Rle
+#' @importFrom IRanges IRanges
+#'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #'
 #' # Get VRanges object
 #' vr <- toVCF(sim)
@@ -84,24 +90,32 @@ toVCF <- function(object, sample_name = "TumorSample", output_file = NULL) {
 
   mutations <- object@mutations
 
+  # Filter out any mutations where ref == alt (VRanges validation requirement)
+  valid_mutations <- mutations[mutations$Ref != mutations$Alt, ]
+
+  if (nrow(valid_mutations) < nrow(mutations)) {
+    warning("Removed ", nrow(mutations) - nrow(valid_mutations),
+            " mutations where ref == alt")
+  }
+
   # Create VRanges object
   vr <- VRanges(
-    seqnames = Rle(mutations$Chromosome),
-    ranges = IRanges(start = mutations$Position, width = 1),
-    ref = mutations$Ref,
-    alt = mutations$Alt,
-    totalDepth = mutations$Depth,
-    refDepth = mutations$Depth - mutations$Alt_reads,
-    altDepth = mutations$Alt_reads,
+    seqnames = Rle(valid_mutations$Chromosome),
+    ranges = IRanges(start = valid_mutations$Position, width = 1),
+    ref = valid_mutations$Ref,
+    alt = valid_mutations$Alt,
+    totalDepth = valid_mutations$Depth,
+    refDepth = valid_mutations$Depth - valid_mutations$Alt_reads,
+    altDepth = valid_mutations$Alt_reads,
     sampleNames = sample_name
   )
 
   # Add custom INFO fields as metadata
-  S4Vectors::mcols(vr)$TRUE_VAF <- mutations$True_VAF
-  S4Vectors::mcols(vr)$VAF <- mutations$VAF
-  S4Vectors::mcols(vr)$CLONE <- mutations$Clone
-  S4Vectors::mcols(vr)$TYPE <- mutations$Type
-  S4Vectors::mcols(vr)$CLONE_IDS <- mutations$Clone_IDs
+  S4Vectors::mcols(vr)$TRUE_VAF <- valid_mutations$True_VAF
+  S4Vectors::mcols(vr)$VAF <- valid_mutations$VAF
+  S4Vectors::mcols(vr)$CLONE <- valid_mutations$Clone
+  S4Vectors::mcols(vr)$TYPE <- valid_mutations$Type
+  S4Vectors::mcols(vr)$CLONE_IDS <- valid_mutations$Clone_IDs
 
   # Write to file if specified
   if (!is.null(output_file)) {
@@ -126,7 +140,7 @@ toVCF <- function(object, sample_name = "TumorSample", output_file = NULL) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' df <- toDataFrame(sim)
 #' head(df)
 #'
@@ -166,7 +180,7 @@ toDataFrame <- function(object, file = NULL, include_true_vaf = TRUE) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #'
 #' \dontrun{
 #' toPyClone(sim, file = "pyclone_input.tsv")
@@ -207,7 +221,7 @@ toPyClone <- function(object, file, sample_id = "sample1") {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #'
 #' \dontrun{
 #' toSciClone(sim, file = "sciclone_input.tsv")

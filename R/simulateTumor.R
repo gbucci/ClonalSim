@@ -27,6 +27,14 @@
 #'     \item error_rate: numeric, base miscall rate (default: 0.001)
 #'     \item binomial_sampling: logical, use binomial sampling (default: TRUE)
 #'   }
+#' @param germline_variants list with germline variant parameters:
+#'   \itemize{
+#'     \item enabled: logical, include germline variants (default: FALSE)
+#'     \item n_variants: integer, number of germline variants to simulate (default: 50)
+#'     \item vaf_expected: numeric, expected VAF for heterozygous germline (default: 0.5)
+#'   }
+#'   Germline variants will have VAF adjusted by tumor purity:
+#'   observed_VAF = germline_vaf * tumor_purity + 0.5 * (1 - tumor_purity)
 #' @param seed integer, random seed for reproducibility. Default: 123
 #'
 #' @return ClonalSimData object containing mutations, parameters, and metadata
@@ -44,8 +52,11 @@
 #'   n_mut_per_clone = c(30, 40, 30)
 #' )
 #'
-#' # Low purity tumor
-#' sim <- simulateTumor(subclone_freqs = c(0.1, 0.15, 0.15))  # 40% purity
+#' # Low purity tumor (40% purity)
+#' sim <- simulateTumor(
+#'   subclone_freqs = c(0.1, 0.15, 0.15),
+#'   n_mut_per_clone = c(20, 25, 30)
+#' )
 #'
 #' # High coverage sequencing
 #' sim <- simulateTumor(
@@ -62,6 +73,13 @@
 #'   sequencing_noise = list(enabled = FALSE)
 #' )
 #'
+#' # Include germline variants
+#' sim <- simulateTumor(
+#'   subclone_freqs = c(0.3, 0.4),  # 70% purity
+#'   n_mut_per_clone = c(40, 50),
+#'   germline_variants = list(enabled = TRUE, n_variants = 100)
+#' )
+#'
 simulateTumor <- function(
     subclone_freqs = c(0.15, 0.25, 0.30, 0.30),
     n_mut_per_clone = c(20, 25, 30, 15),
@@ -75,6 +93,11 @@ simulateTumor <- function(
       depth_dispersion = 20,
       error_rate = 0.001,
       binomial_sampling = TRUE
+    ),
+    germline_variants = list(
+      enabled = FALSE,
+      n_variants = 50,
+      vaf_expected = 0.5
     ),
     seed = 123
 ) {
@@ -144,6 +167,14 @@ simulateTumor <- function(
   # 2. Shared mutations between subgroups
   for (i in seq_along(n_mut_shared)) {
     shared_clones <- as.numeric(strsplit(names(n_mut_shared)[i], " ")[[1]])
+
+    # Skip if any clone index is out of bounds
+    if (any(shared_clones > length(subclone_freqs))) {
+      warning("Shared mutation group '", names(n_mut_shared)[i],
+              "' references non-existent clones. Skipping.")
+      next
+    }
+
     shared_freq <- sum(subclone_freqs[shared_clones])
 
     mutation_list[[idx]] <- .generate_mutations(
@@ -164,6 +195,39 @@ simulateTumor <- function(
       subclone_freqs[i],
       clone_ids = i,
       type = "private",
+      bio_noise = biological_noise,
+      seq_noise = sequencing_noise
+    )
+    idx <- idx + 1
+  }
+
+  # 4. Germline variants (if enabled)
+  if (!is.null(germline_variants) && germline_variants$enabled) {
+    # Fill in defaults
+    if (!"n_variants" %in% names(germline_variants)) {
+      germline_variants$n_variants <- 50
+    }
+    if (!"vaf_expected" %in% names(germline_variants)) {
+      germline_variants$vaf_expected <- 0.5
+    }
+
+    # Calculate tumor purity
+    tumor_purity <- sum(subclone_freqs)
+
+    # Germline variants in tumor sample:
+    # - In pure tumor cells: VAF = 0.5 (heterozygous)
+    # - In normal cells: VAF = 0.5 (heterozygous)
+    # - Mixed sample: VAF = 0.5 * tumor_purity + 0.5 * (1 - tumor_purity) = 0.5
+    # So germline VAF is always ~0.5 regardless of purity!
+    # (This is the key difference from somatic variants)
+
+    germline_vaf <- germline_variants$vaf_expected
+
+    mutation_list[[idx]] <- .generate_mutations(
+      germline_variants$n_variants,
+      germline_vaf,
+      clone_ids = "germline",
+      type = "germline",
       bio_noise = biological_noise,
       seq_noise = sequencing_noise
     )
@@ -204,7 +268,8 @@ simulateTumor <- function(
     n_mut_founder = n_mut_founder,
     n_mut_shared = n_mut_shared,
     biological_noise = biological_noise,
-    sequencing_noise = sequencing_noise
+    sequencing_noise = sequencing_noise,
+    germline_variants = germline_variants
   )
 
   # Create metadata
@@ -242,6 +307,10 @@ simulateTumor <- function(
     clone_str <- paste(clone_ids, collapse = "_")
     mut_names <- paste0("Shared_C", clone_str, "_mut", seq_len(n_mut))
     clone_label <- paste0("Clone", paste(clone_ids, collapse = "+"))
+  } else if (type == "germline") {
+    mut_names <- paste0("Germline_", seq_len(n_mut))
+    clone_label <- "Germline"
+    clone_ids <- "germline"  # Ensure it's a string
   } else {
     mut_names <- paste0("Clone", clone_ids, "_mut", seq_len(n_mut))
     clone_label <- paste0("Clone", clone_ids)

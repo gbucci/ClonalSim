@@ -16,7 +16,7 @@ list with summary statistics
 Summary method for ClonalSimData
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 summary(sim)
 
 }

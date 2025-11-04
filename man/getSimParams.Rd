@@ -16,7 +16,7 @@ list with simulation parameters
 Get simulation parameters
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 params <- getSimParams(sim)
 params$subclone_freqs
 

@@ -16,7 +16,7 @@ numeric vector of true VAF values
 Get true VAF values (biological, without sequencing noise)
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 true_vaf <- getTrueVAF(sim)
 summary(true_vaf)
 

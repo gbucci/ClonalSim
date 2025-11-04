@@ -19,7 +19,7 @@ Converts mutation data to a GenomicRanges::GRanges object,
   the standard Bioconductor data structure for genomic intervals.
 }
 \examples{
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 gr <- toGRanges(sim)
 print(gr)
 

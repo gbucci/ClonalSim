@@ -3,8 +3,9 @@ Type: Package
 Title: Simulation of Tumor Clonal Evolution with Realistic Sequencing Noise
 Version: 0.99.0
 Authors@R: c(
-    person("Gabriele", "Bucci", email = "gabriele.bucci@example.com",
-           role = c("aut", "cre"))
+    person("Gabriele", "Bucci", email = "bucci.g@gmail.com",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-9838-7204"))
     )
 Description: ClonalSim generates realistic mutational profiles of tumor samples
     with hierarchical clonal structure. It simulates founder, shared, and private
@@ -15,20 +16,19 @@ Description: ClonalSim generates realistic mutational profiles of tumor samples
     algorithms, and teaching tumor heterogeneity concepts.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Depends:
-    R (>= 4.3.0)
+    R (>= 4.5.0)
 Imports:
     methods,
     stats,
     utils,
     ggplot2,
     tidyr,
+    rlang,
     GenomicRanges,
     IRanges,
     S4Vectors,
-    VariantAnnotation,
-    BiocGenerics
+    VariantAnnotation
 Suggests:
     testthat (>= 3.0.0),
     knitr,
@@ -36,7 +36,7 @@ Suggests:
     BiocStyle,
     devtools,
     fishplot
-biocViews: Software, Sequencing, SomaticMutation, Simulation,
+biocViews: Software, Sequencing, SomaticMutation,
     VariantDetection, Coverage, Visualization, DataImport
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3

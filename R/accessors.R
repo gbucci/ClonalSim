@@ -11,7 +11,7 @@ NULL
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' mutations <- getMutations(sim)
 #' head(mutations)
 #'
@@ -27,7 +27,7 @@ getMutations <- function(object) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' params <- getSimParams(sim)
 #' params$subclone_freqs
 #'
@@ -43,7 +43,7 @@ getSimParams <- function(object) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' true_vaf <- getTrueVAF(sim)
 #' summary(true_vaf)
 #'
@@ -59,7 +59,7 @@ getTrueVAF <- function(object) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' obs_vaf <- getObservedVAF(sim)
 #' summary(obs_vaf)
 #'
@@ -75,7 +75,7 @@ getObservedVAF <- function(object) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' structure <- getClonalStructure(sim)
 #' print(structure)
 #'
@@ -91,7 +91,7 @@ getClonalStructure <- function(object) {
 #' @export
 #'
 #' @examples
-#' sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+#' sim <- simulateTumor()
 #' metadata <- getMetadata(sim)
 #' metadata$date
 #'

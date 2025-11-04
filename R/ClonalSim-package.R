@@ -62,11 +62,14 @@
 #'
 #' # Custom simulation: low purity tumor
 #' sim_low_purity <- simulateTumor(
-#'   subclone_freqs = c(0.1, 0.15, 0.15)  # 40% purity
+#'   subclone_freqs = c(0.1, 0.15, 0.15),  # 40% purity
+#'   n_mut_per_clone = c(20, 25, 30)
 #' )
 #'
 #' # High coverage sequencing
 #' sim_deep <- simulateTumor(
+#'   subclone_freqs = c(0.3, 0.4, 0.3),
+#'   n_mut_per_clone = c(30, 40, 30),
 #'   sequencing_noise = list(mean_depth = 500, depth_dispersion = 100)
 #' )
 #'
@@ -87,5 +90,8 @@
 #' @aliases ClonalSim
 #'
 ## usethis namespace: start
+#' @importFrom methods new validObject
+#' @importFrom stats rbeta rbinom rnbinom rpois median sd
+#' @importFrom utils packageVersion write.csv write.table
 ## usethis namespace: end
 NULL

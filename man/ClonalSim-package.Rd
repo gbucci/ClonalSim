@@ -70,11 +70,14 @@ gr <- toGRanges(sim)
 
 # Custom simulation: low purity tumor
 sim_low_purity <- simulateTumor(
-  subclone_freqs = c(0.1, 0.15, 0.15)  # 40\% purity
+  subclone_freqs = c(0.1, 0.15, 0.15),  # 40\% purity
+  n_mut_per_clone = c(20, 25, 30)
 )
 
 # High coverage sequencing
 sim_deep <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4, 0.3),
+  n_mut_per_clone = c(30, 40, 30),
   sequencing_noise = list(mean_depth = 500, depth_dispersion = 100)
 )
 
@@ -101,7 +104,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Gabriele Bucci \email{gabriele.bucci@example.com}
+\strong{Maintainer}: Gabriele Bucci \email{bucci.g@gmail.com} (\href{https://orcid.org/0000-0001-9838-7204}{ORCID})
 
 }
 \keyword{internal}

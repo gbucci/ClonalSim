@@ -29,7 +29,7 @@ Note: You need to load ggplot2 explicitly before using plot():
 \examples{
 \dontrun{
 library(ggplot2)
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor()
 plot(sim, type = "vaf_density")
 plot(sim, type = "vaf_scatter")
 }

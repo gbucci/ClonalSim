@@ -32,7 +32,10 @@ biological_noise, sequencing_noise}
 
 \examples{
 # Create a simple simulation
-sim <- simulateTumor(subclone_freqs = c(0.3, 0.4, 0.3))
+sim <- simulateTumor(
+  subclone_freqs = c(0.3, 0.4, 0.3),
+  n_mut_per_clone = c(30, 40, 30)
+)
 
 # Access mutations
 head(getMutations(sim))
