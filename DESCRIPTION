@@ -1,7 +1,7 @@
 Package: ClonalSim
 Type: Package
 Title: Simulation of Tumor Clonal Evolution with Realistic Sequencing Noise
-Version: 0.99.0
+Version: 1.0.1
 Authors@R: c(
     person("Gabriele", "Bucci", email = "bucci.g@gmail.com",
            role = c("aut", "cre"),
