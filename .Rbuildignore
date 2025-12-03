@@ -2,7 +2,6 @@
 ^\.Rproj\.user$
 ^\.git$
 ^\.gitignore$
-^CLAUDE\.md$
 ^\.github$
 ^README\.Rmd$
 ^LICENSE\.md$
@@ -13,7 +12,6 @@
 ^simulated_mutational_profile\.csv$
 ^.*\.png$
 ^inst/scripts/simulate_tumor_clones\.R$
-.claude
 ^CITATION\.cff$
 ^PACKAGE_TRANSFORMATION\.md$
 ^Rplot\.pdf$
