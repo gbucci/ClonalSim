@@ -417,7 +417,7 @@ Created by Gabriele Bucci for bioinformatics applications in computational oncol
 
 - **Issues**: https://github.com/gbucci/ClonalSim/issues
 - **Documentation**: Run `browseVignettes("ClonalSim")` in R
-- **Email**: gabriele.bucci@example.com
+
 
 ## References
 
