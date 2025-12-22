@@ -17,7 +17,7 @@ Description: ClonalSim generates realistic mutational profiles of tumor samples
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
-    R (>= 4.5.0)
+    R (>= 4.6.0)
 Imports:
     methods,
     stats,
@@ -33,9 +33,7 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    BiocStyle,
-    devtools,
-    fishplot
+    BiocStyle
 biocViews: Software, Sequencing, SomaticMutation,
     VariantDetection, Coverage, Visualization, DataImport
 VignetteBuilder: knitr
