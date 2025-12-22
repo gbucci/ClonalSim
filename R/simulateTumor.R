@@ -35,9 +35,9 @@
 #'   }
 #'   Germline variants will have VAF adjusted by tumor purity:
 #'   observed_VAF = germline_vaf * tumor_purity + 0.5 * (1 - tumor_purity)
-#' @param seed integer, random seed for reproducibility. Default: 123
-#'
 #' @return ClonalSimData object containing mutations, parameters, and metadata
+#' @note For reproducibility, set the random seed before calling this function
+#'   using \code{set.seed()}.
 #' @export
 #'
 #' @examples
@@ -98,8 +98,7 @@ simulateTumor <- function(
       enabled = FALSE,
       n_variants = 50,
       vaf_expected = 0.5
-    ),
-    seed = 123
+    )
 ) {
 
   # Input validation
@@ -111,11 +110,6 @@ simulateTumor <- function(
   }
   if (length(n_mut_per_clone) != length(subclone_freqs)) {
     stop("n_mut_per_clone must have same length as subclone_freqs")
-  }
-
-  # Set seed for reproducibility
-  if (!is.null(seed)) {
-    set.seed(seed)
   }
 
   # Store clone names

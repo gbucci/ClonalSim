@@ -1,9 +1,3 @@
-#' Accessor functions for ClonalSimData objects
-#'
-#' @name accessors
-#' @rdname accessors
-NULL
-
 #' Get mutations data frame
 #'
 #' @param object ClonalSimData object
