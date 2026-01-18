@@ -267,10 +267,17 @@ simulateTumor <- function(
   )
 
   # Create metadata
+  # Capture current random seed if available
+  current_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+    get(".Random.seed", envir = .GlobalEnv)
+  } else {
+    NULL
+  }
+
   metadata <- list(
     date = as.character(Sys.time()),
     version = as.character(packageVersion("ClonalSim")),
-    seed = seed
+    seed = current_seed
   )
 
   # Create and return ClonalSimData object
