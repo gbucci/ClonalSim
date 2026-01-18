@@ -14,7 +14,7 @@ simulateTumor(
     "negative_binomial", depth_dispersion = 20, error_rate = 0.001, binomial_sampling =
     TRUE),
   germline_variants = list(enabled = FALSE, n_variants = 50, vaf_expected = 0.5),
-  seed = 123
+  seed = NULL
 )
 }
 \arguments{
