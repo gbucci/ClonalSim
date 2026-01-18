@@ -35,9 +35,11 @@
 #'   }
 #'   Germline variants will have VAF adjusted by tumor purity:
 #'   observed_VAF = germline_vaf * tumor_purity + 0.5 * (1 - tumor_purity)
+#' @param seed integer, random seed for reproducibility (default: NULL, no seed set)
 #' @return ClonalSimData object containing mutations, parameters, and metadata
-#' @note For reproducibility, set the random seed before calling this function
-#'   using \code{set.seed()}.
+#' @note For reproducibility, you can either set the random seed before calling
+#'   this function using \code{set.seed()}, or pass a seed value to the \code{seed}
+#'   parameter.
 #' @export
 #'
 #' @examples
@@ -98,8 +100,14 @@ simulateTumor <- function(
       enabled = FALSE,
       n_variants = 50,
       vaf_expected = 0.5
-    )
+    ),
+    seed = NULL
 ) {
+
+  # Set random seed if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
 
   # Input validation
   if (any(subclone_freqs < 0) || any(subclone_freqs > 1)) {
@@ -267,17 +275,10 @@ simulateTumor <- function(
   )
 
   # Create metadata
-  # Capture current random seed if available
-  current_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
-    get(".Random.seed", envir = .GlobalEnv)
-  } else {
-    NULL
-  }
-
   metadata <- list(
     date = as.character(Sys.time()),
     version = as.character(packageVersion("ClonalSim")),
-    seed = current_seed
+    seed = seed
   )
 
   # Create and return ClonalSimData object
