@@ -1,7 +1,8 @@
 test_that("toGRanges creates valid GRanges object", {
   skip_if_not_installed("GenomicRanges")
 
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   gr <- toGRanges(sim)
 
   expect_s4_class(gr, "GRanges")
@@ -17,7 +18,8 @@ test_that("toGRanges creates valid GRanges object", {
 test_that("toGRanges without metadata works", {
   skip_if_not_installed("GenomicRanges")
 
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   gr <- toGRanges(sim, include_metadata = FALSE)
 
   expect_s4_class(gr, "GRanges")
@@ -27,7 +29,8 @@ test_that("toGRanges without metadata works", {
 test_that("toVCF creates valid VRanges object", {
   skip_if_not_installed("VariantAnnotation")
 
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   vr <- suppressWarnings(toVCF(sim, sample_name = "TestSample"))
 
   expect_s4_class(vr, "VRanges")
@@ -42,7 +45,8 @@ test_that("toVCF creates valid VRanges object", {
 })
 
 test_that("toDataFrame works correctly", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   df <- toDataFrame(sim)
 
   expect_s3_class(df, "data.frame")
@@ -55,7 +59,8 @@ test_that("toDataFrame works correctly", {
 })
 
 test_that("Export functions work with file output", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   tmp_file <- tempfile(fileext = ".csv")
 
   # toDataFrame with file - check invisibility
@@ -67,7 +72,8 @@ test_that("Export functions work with file output", {
 })
 
 test_that("toPyClone creates correct format", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   tmp_file <- tempfile(fileext = ".tsv")
 
   result <- toPyClone(sim, file = tmp_file, sample_id = "test")
@@ -84,7 +90,8 @@ test_that("toPyClone creates correct format", {
 })
 
 test_that("toSciClone creates correct format", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
   tmp_file <- tempfile(fileext = ".tsv")
 
   result <- toSciClone(sim, file = tmp_file)

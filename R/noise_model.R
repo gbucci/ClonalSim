@@ -14,10 +14,10 @@
 #'
 #' @details
 #' For a clone with true frequency \code{f}, VAF values are sampled from
-#' Beta(α, β) where:
+#' Beta(alpha, beta) where:
 #' \itemize{
-#'   \item α = f × concentration
-#'   \item β = (1-f) × concentration
+#'   \item alpha = f * concentration
+#'   \item beta = (1-f) * concentration
 #' }
 #'
 #' Higher concentration values result in VAF closer to the expected frequency,
