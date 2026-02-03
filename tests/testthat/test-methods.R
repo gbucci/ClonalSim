@@ -1,5 +1,6 @@
 test_that("show method works", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
 
   # Capture output
   output <- capture.output(show(sim))
@@ -10,7 +11,8 @@ test_that("show method works", {
 })
 
 test_that("summary method works", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
 
   summ <- summary(sim)
 
@@ -30,7 +32,8 @@ test_that("summary method works", {
 test_that("plot method creates ggplot objects", {
   skip_if_not_installed("ggplot2")
 
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
 
   # VAF density plot
   p1 <- plot(sim, type = "vaf_density")
