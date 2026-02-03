@@ -13,8 +13,7 @@ simulateTumor(
   sequencing_noise = list(enabled = TRUE, mean_depth = 100, depth_variation =
     "negative_binomial", depth_dispersion = 20, error_rate = 0.001, binomial_sampling =
     TRUE),
-  germline_variants = list(enabled = FALSE, n_variants = 50, vaf_expected = 0.5),
-  seed = NULL
+  germline_variants = list(enabled = FALSE, n_variants = 50, vaf_expected = 0.5)
 )
 }
 \arguments{
@@ -55,8 +54,6 @@ Default: list("2 3 4" = 15, "3 4" = 12, "1 2" = 8)}
 }
 Germline variants will have VAF adjusted by tumor purity:
 observed_VAF = germline_vaf * tumor_purity + 0.5 * (1 - tumor_purity)}
-
-\item{seed}{integer, random seed for reproducibility. Default: 123}
 }
 \value{
 ClonalSimData object containing mutations, parameters, and metadata

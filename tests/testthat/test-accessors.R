@@ -1,5 +1,6 @@
 test_that("Accessor functions work correctly", {
-  sim <- simulateTumor(seed = 123)
+  set.seed(123)
+  sim <- simulateTumor()
 
   # getMutations
   mutations <- getMutations(sim)
