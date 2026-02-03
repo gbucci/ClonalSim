@@ -68,12 +68,14 @@ library(ggplot2)  # Required for plotting functions
 The main function is `simulateTumor()`, which generates a complete simulation:
 
 ```{r basic_sim}
+# Set seed for reproducibility
+set.seed(123)
+
 # Simulate tumor with 4 subclones
 sim <- simulateTumor(
   subclone_freqs = c(0.15, 0.25, 0.30, 0.30),
   n_mut_per_clone = c(20, 25, 30, 15),
-  n_mut_founder = 10,
-  seed = 123
+  n_mut_founder = 10
 )
 
 # Display summary
@@ -133,19 +135,19 @@ more appropriate than Gaussian for frequency data (bounded 0-1).
 
 ```{r bio_noise_demo, fig.cap="Effect of biological noise concentration parameter"}
 # High heterogeneity (low concentration)
+set.seed(123)
 sim_high_het <- simulateTumor(
   subclone_freqs = c(0.3, 0.4, 0.3),
   n_mut_per_clone = c(30, 40, 30),
-  biological_noise = list(enabled = TRUE, concentration = 20),
-  seed = 123
+  biological_noise = list(enabled = TRUE, concentration = 20)
 )
 
 # Low heterogeneity (high concentration)
+set.seed(123)
 sim_low_het <- simulateTumor(
   subclone_freqs = c(0.3, 0.4, 0.3),
   n_mut_per_clone = c(30, 40, 30),
-  biological_noise = list(enabled = TRUE, concentration = 100),
-  seed = 123
+  biological_noise = list(enabled = TRUE, concentration = 100)
 )
 
 # Compare VAF spread
@@ -165,22 +167,22 @@ mappability, and PCR artifacts. ClonalSim uses negative binomial distribution:
 
 ```{r depth_demo, fig.cap="Depth distributions: negative binomial vs Poisson"}
 # Realistic (negative binomial)
+set.seed(123)
 sim_nb <- simulateTumor(
   sequencing_noise = list(
     mean_depth = 100,
     depth_variation = "negative_binomial",
     depth_dispersion = 20
-  ),
-  seed = 123
+  )
 )
 
 # Unrealistic (Poisson)
+set.seed(124)
 sim_poisson <- simulateTumor(
   sequencing_noise = list(
     mean_depth = 100,
     depth_variation = "poisson"
-  ),
-  seed = 124
+  )
 )
 
 par(mfrow = c(1, 2))
@@ -197,15 +199,15 @@ This is especially important at low depth or low VAF:
 
 ```{r binomial_demo, fig.cap="Stochastic variation from binomial sampling"}
 # With binomial sampling (realistic)
+set.seed(123)
 sim_binom <- simulateTumor(
-  sequencing_noise = list(binomial_sampling = TRUE),
-  seed = 123
+  sequencing_noise = list(binomial_sampling = TRUE)
 )
 
 # Without binomial sampling (deterministic)
+set.seed(123)
 sim_det <- simulateTumor(
-  sequencing_noise = list(binomial_sampling = FALSE),
-  seed = 123
+  sequencing_noise = list(binomial_sampling = FALSE)
 )
 
 # Compare True_VAF vs observed VAF
@@ -229,10 +231,10 @@ with(getMutations(sim_det), {
 Many clinical samples have significant normal cell contamination:
 
 ```{r low_purity}
+set.seed(123)
 sim_low_purity <- simulateTumor(
   subclone_freqs = c(0.05, 0.10, 0.15),  # Sum = 0.30 (30% tumor)
-  n_mut_per_clone = c(20, 25, 30),
-  seed = 123
+  n_mut_per_clone = c(20, 25, 30)
 )
 
 cat("Tumor purity:", sum(getSimParams(sim_low_purity)$subclone_freqs), "\n")
@@ -244,14 +246,14 @@ plot(sim_low_purity, type = "vaf_density")
 Deep targeted sequencing with uniform coverage:
 
 ```{r high_coverage}
+set.seed(123)
 sim_deep <- simulateTumor(
   sequencing_noise = list(
     enabled = TRUE,
     mean_depth = 500,
     depth_dispersion = 100,  # More uniform
     error_rate = 0.0005
-  ),
-  seed = 123
+  )
 )
 
 summary(getMutations(sim_deep)$Depth)
@@ -263,13 +265,13 @@ plot(sim_deep, type = "depth_histogram")
 Exome sequencing with variable coverage:
 
 ```{r low_coverage}
+set.seed(123)
 sim_exome <- simulateTumor(
   sequencing_noise = list(
     mean_depth = 50,
     depth_dispersion = 10,  # More variable
     error_rate = 0.002
-  ),
-  seed = 123
+  )
 )
 
 summary(getMutations(sim_exome)$Depth)
@@ -280,10 +282,10 @@ summary(getMutations(sim_exome)$Depth)
 For testing algorithms without noise:
 
 ```{r no_noise}
+set.seed(123)
 sim_ideal <- simulateTumor(
   biological_noise = list(enabled = FALSE),
-  sequencing_noise = list(enabled = FALSE),
-  seed = 123
+  sequencing_noise = list(enabled = FALSE)
 )
 
 # VAF exactly matches expected frequencies
@@ -296,6 +298,7 @@ Real tumor sequencing data contains both somatic and germline variants. Germline
 
 ```{r germline_variants, fig.cap="VAF distribution showing germline peak at 0.5"}
 # 70% purity tumor with germline variants
+set.seed(789)
 sim_germline <- simulateTumor(
   subclone_freqs = c(0.3, 0.4),  # 70% tumor purity
   n_mut_per_clone = c(40, 50),
@@ -303,8 +306,7 @@ sim_germline <- simulateTumor(
     enabled = TRUE,
     n_variants = 150,  # Number of germline SNPs
     vaf_expected = 0.5  # Heterozygous diploid
-  ),
-  seed = 789
+  )
 )
 
 # Check mutation types
@@ -384,10 +386,10 @@ Here's a typical workflow for benchmarking a variant caller:
 
 ```{r benchmark_workflow, eval=FALSE}
 # 1. Generate ground truth
+set.seed(42)
 sim <- simulateTumor(
   subclone_freqs = c(0.2, 0.3, 0.5),
-  n_mut_per_clone = c(50, 75, 50),
-  seed = 42
+  n_mut_per_clone = c(50, 75, 50)
 )
 
 # 2. Export to VCF (ground truth)
@@ -413,6 +415,7 @@ true_mutations <- getMutations(sim)
 ## Complex Hierarchies
 
 ```{r complex_hierarchy}
+set.seed(123)
 sim_complex <- simulateTumor(
   subclone_freqs = c(0.1, 0.15, 0.2, 0.25, 0.3),
   n_mut_per_clone = c(30, 40, 50, 40, 30),
@@ -421,8 +424,7 @@ sim_complex <- simulateTumor(
     "3 4 5" = 15,    # Shared by clones 3,4,5
     "4 5" = 10,      # Shared by clones 4,5
     "1 2" = 8        # Shared by clones 1,2
-  ),
-  seed = 123
+  )
 )
 
 plot(sim_complex, type = "vaf_density")
