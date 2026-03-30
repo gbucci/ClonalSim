@@ -25,9 +25,7 @@ sim <- simulateTumor()
 df <- toDataFrame(sim)
 head(df)
 
-# Export to CSV
-\dontrun{
-toDataFrame(sim, file = "mutations.csv")
-}
-
+# Export to CSV (use tempdir to avoid writing to user's filesystem)
+csv_file <- tempfile(fileext = ".csv")
+toDataFrame(sim, file = csv_file)
 }

@@ -130,12 +130,10 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' \code{library(ggplot2)}
 #'
 #' @examples
-#' \dontrun{
 #' library(ggplot2)
 #' sim <- simulateTumor()
 #' plot(sim, type = "vaf_density")
 #' plot(sim, type = "vaf_scatter")
-#' }
 #'
 setMethod("plot", signature(x = "ClonalSimData", y = "missing"),
           function(x, y, type = "vaf_density", ...) {

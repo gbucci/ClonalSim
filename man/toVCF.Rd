@@ -26,12 +26,10 @@ Exports mutation data to Variant Call Format (VCF), the
 sim <- simulateTumor()
 
 # Get VRanges object
-vr <- toVCF(sim)
+vr <- suppressWarnings(toVCF(sim))
 print(vr)
 
-# Write to VCF file
-\dontrun{
-toVCF(sim, output_file = "simulated_mutations.vcf")
-}
-
+# Write to VCF file (use tempdir to avoid writing to user's filesystem)
+vcf_file <- tempfile(fileext = ".vcf")
+suppressWarnings(toVCF(sim, output_file = vcf_file))
 }
