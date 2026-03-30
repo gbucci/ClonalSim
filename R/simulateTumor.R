@@ -237,9 +237,10 @@ simulateTumor <- function(
   complete_data <- do.call(rbind, mutation_list)
 
   # Add genomic coordinates (random, for demonstration)
-  complete_data$Chromosome <- sample(paste0("chr", 1:22),
+  complete_data$Chromosome <- sample(paste0("chr", seq_len(22)),
                                       nrow(complete_data), replace = TRUE)
-  complete_data$Position <- sample(1e6:2e8, nrow(complete_data), replace = TRUE)
+  complete_data$Position <- sample(seq(1e6, 2e8), nrow(complete_data),
+                                   replace = TRUE)
   complete_data$Ref <- sample(c("A", "T", "C", "G"),
                                nrow(complete_data), replace = TRUE)
   complete_data$Alt <- sample(c("A", "T", "C", "G"),

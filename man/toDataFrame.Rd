@@ -26,8 +26,8 @@ df <- toDataFrame(sim)
 head(df)
 
 # Export to CSV
-\dontrun{
-toDataFrame(sim, file = "mutations.csv")
+\donttest{
+toDataFrame(sim, file = file.path(tempdir(), "mutations.csv"))
 }
 
 }

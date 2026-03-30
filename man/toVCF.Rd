@@ -30,8 +30,8 @@ vr <- toVCF(sim)
 print(vr)
 
 # Write to VCF file
-\dontrun{
-toVCF(sim, output_file = "simulated_mutations.vcf")
+\donttest{
+toVCF(sim, output_file = file.path(tempdir(), "simulated_mutations.vcf"))
 }
 
 }

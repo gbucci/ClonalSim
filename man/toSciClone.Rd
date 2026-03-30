@@ -20,8 +20,8 @@ Exports data in format suitable for SciClone clonal analysis.
 \examples{
 sim <- simulateTumor()
 
-\dontrun{
-toSciClone(sim, file = "sciclone_input.tsv")
+\donttest{
+toSciClone(sim, file = file.path(tempdir(), "sciclone_input.tsv"))
 }
 
 }
