@@ -19,9 +19,6 @@ Exports data in format suitable for SciClone clonal analysis.
 }
 \examples{
 sim <- simulateTumor()
-
-\dontrun{
-toSciClone(sim, file = "sciclone_input.tsv")
-}
-
+sciclone_file <- tempfile(fileext = ".tsv")
+toSciClone(sim, file = sciclone_file)
 }

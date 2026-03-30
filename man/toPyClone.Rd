@@ -22,9 +22,6 @@ Exports data in format suitable for PyClone clonal deconvolution
 }
 \examples{
 sim <- simulateTumor()
-
-\dontrun{
-toPyClone(sim, file = "pyclone_input.tsv")
-}
-
+pyclone_file <- tempfile(fileext = ".tsv")
+toPyClone(sim, file = pyclone_file)
 }

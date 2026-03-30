@@ -72,6 +72,7 @@ The main function is `simulateTumor()`, which generates a complete simulation:
 set.seed(123)
 
 # Simulate tumor with 4 subclones
+set.seed(123)
 sim <- simulateTumor(
   subclone_freqs = c(0.15, 0.25, 0.30, 0.30),
   n_mut_per_clone = c(20, 25, 30, 15),
@@ -351,33 +352,42 @@ length(gr_chr1)
 
 ## Export to VCF
 
-```{r vcf, eval=FALSE}
+```{r vcf}
 # Get VRanges object
-vr <- toVCF(sim, sample_name = "TumorSample")
+vr <- suppressWarnings(toVCF(sim, sample_name = "TumorSample"))
+vr
 
-# Write to VCF file
-toVCF(sim, output_file = "simulated_mutations.vcf")
+# Write to VCF file (using tempdir to avoid polluting user's filesystem)
+vcf_file <- tempfile(fileext = ".vcf")
+suppressWarnings(toVCF(sim, output_file = vcf_file))
+file.exists(vcf_file)
 ```
 
 ## Export for Other Tools
 
 ### PyClone Format
 
-```{r pyclone, eval=FALSE}
-toPyClone(sim, file = "pyclone_input.tsv", sample_id = "sample1")
+```{r pyclone}
+pyclone_file <- tempfile(fileext = ".tsv")
+toPyClone(sim, file = pyclone_file, sample_id = "sample1")
+head(read.table(pyclone_file, header = TRUE, sep = "\t"))
 ```
 
 ### SciClone Format
 
-```{r sciclone, eval=FALSE}
-toSciClone(sim, file = "sciclone_input.tsv")
+```{r sciclone}
+sciclone_file <- tempfile(fileext = ".tsv")
+toSciClone(sim, file = sciclone_file)
+head(read.table(sciclone_file, header = TRUE, sep = "\t"))
 ```
 
 ### Simple CSV
 
-```{r csv, eval=FALSE}
+```{r csv}
 df <- toDataFrame(sim)
-write.csv(df, "mutations.csv", row.names = FALSE)
+csv_file <- tempfile(fileext = ".csv")
+write.csv(df, csv_file, row.names = FALSE)
+head(read.csv(csv_file))
 ```
 
 # Benchmarking Workflow

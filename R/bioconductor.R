@@ -77,13 +77,12 @@ toGRanges <- function(object, include_metadata = TRUE) {
 #' sim <- simulateTumor()
 #'
 #' # Get VRanges object
-#' vr <- toVCF(sim)
+#' vr <- suppressWarnings(toVCF(sim))
 #' print(vr)
 #'
-#' # Write to VCF file
-#' \dontrun{
-#' toVCF(sim, output_file = "simulated_mutations.vcf")
-#' }
+#' # Write to VCF file (use tempdir to avoid writing to user's filesystem)
+#' vcf_file <- tempfile(fileext = ".vcf")
+#' suppressWarnings(toVCF(sim, output_file = vcf_file))
 #'
 toVCF <- function(object, sample_name = "TumorSample", output_file = NULL) {
   stopifnot(inherits(object, "ClonalSimData"))
@@ -144,10 +143,9 @@ toVCF <- function(object, sample_name = "TumorSample", output_file = NULL) {
 #' df <- toDataFrame(sim)
 #' head(df)
 #'
-#' # Export to CSV
-#' \dontrun{
-#' toDataFrame(sim, file = "mutations.csv")
-#' }
+#' # Export to CSV (use tempdir to avoid writing to user's filesystem)
+#' csv_file <- tempfile(fileext = ".csv")
+#' toDataFrame(sim, file = csv_file)
 #'
 toDataFrame <- function(object, file = NULL, include_true_vaf = TRUE) {
   stopifnot(inherits(object, "ClonalSimData"))
@@ -181,10 +179,8 @@ toDataFrame <- function(object, file = NULL, include_true_vaf = TRUE) {
 #'
 #' @examples
 #' sim <- simulateTumor()
-#'
-#' \dontrun{
-#' toPyClone(sim, file = "pyclone_input.tsv")
-#' }
+#' pyclone_file <- tempfile(fileext = ".tsv")
+#' toPyClone(sim, file = pyclone_file)
 #'
 toPyClone <- function(object, file, sample_id = "sample1") {
   stopifnot(inherits(object, "ClonalSimData"))
@@ -222,10 +218,8 @@ toPyClone <- function(object, file, sample_id = "sample1") {
 #'
 #' @examples
 #' sim <- simulateTumor()
-#'
-#' \dontrun{
-#' toSciClone(sim, file = "sciclone_input.tsv")
-#' }
+#' sciclone_file <- tempfile(fileext = ".tsv")
+#' toSciClone(sim, file = sciclone_file)
 #'
 toSciClone <- function(object, file) {
   stopifnot(inherits(object, "ClonalSimData"))
