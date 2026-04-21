@@ -58,7 +58,6 @@ BiocManager::install("gbucci/ClonalSim")
 
 ```{r library}
 library(ClonalSim)
-library(ggplot2)  # Required for plotting functions
 ```
 
 # Basic Usage
@@ -69,9 +68,6 @@ The main function is `simulateTumor()`, which generates a complete simulation:
 
 ```{r basic_sim}
 # Set seed for reproducibility
-set.seed(123)
-
-# Simulate tumor with 4 subclones
 set.seed(123)
 sim <- simulateTumor(
   subclone_freqs = c(0.15, 0.25, 0.30, 0.30),

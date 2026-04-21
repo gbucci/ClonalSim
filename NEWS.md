@@ -1,3 +1,13 @@
+# ClonalSim 0.99.6
+
+## Bug Fixes
+
+* Removed incorrect `seed` parameter from `simulateTumor()` examples in README;
+  use `set.seed()` before calling the function for reproducibility
+* Removed unnecessary `library(ggplot2)` calls from README, vignette, and
+  documentation — ggplot2 is already imported via NAMESPACE and loads
+  automatically with the package
+
 # ClonalSim 0.99.0
 
 ## New Features

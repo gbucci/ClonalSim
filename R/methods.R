@@ -125,12 +125,7 @@ print.summary.ClonalSimData <- function(x, ...) {
 #' @import ggplot2
 #' @importFrom tidyr pivot_longer all_of
 #'
-#' @details
-#' Note: You need to load ggplot2 explicitly before using plot():
-#' \code{library(ggplot2)}
-#'
 #' @examples
-#' library(ggplot2)
 #' sim <- simulateTumor()
 #' plot(sim, type = "vaf_density")
 #' plot(sim, type = "vaf_scatter")

@@ -80,9 +80,6 @@
 #'   germline_variants = list(enabled = TRUE, n_variants = 100)
 #' )
 #'
-#' # For reproducibility, set seed before calling
-#' set.seed(123)
-#' sim <- simulateTumor()
 #'
 simulateTumor <- function(
     subclone_freqs = c(0.15, 0.25, 0.30, 0.30),

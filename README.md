@@ -95,8 +95,7 @@ sim
 # Get detailed statistics
 summary(sim)
 
-# Visualize results (requires ggplot2)
-library(ggplot2)
+# Visualize results
 plot(sim, type = "vaf_density")
 ```
 
@@ -121,11 +120,7 @@ structure <- getClonalStructure(sim)
 
 ### Visualization
 
-**Note:** You need to load `ggplot2` explicitly for plotting:
-
 ```r
-library(ggplot2)
-
 # VAF density plot (most important)
 plot(sim, type = "vaf_density")
 
@@ -271,10 +266,10 @@ sim_custom <- simulateTumor(
 
 ```r
 # 1. Generate ground truth
+set.seed(42)
 sim <- simulateTumor(
   subclone_freqs = c(0.2, 0.3, 0.5),
-  n_mut_per_clone = c(50, 75, 50),
-  seed = 42
+  n_mut_per_clone = c(50, 75, 50)
 )
 
 # 2. Get true mutations
